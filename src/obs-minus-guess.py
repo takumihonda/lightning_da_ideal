@@ -11,6 +11,9 @@ from matplotlib.colors import BoundaryNorm
 
 from tools_LT import read_evar4d_nc, get_eGLM, get_GLM
 
+DEBUG = True
+DEBUG = False
+
 quick = True
 #quick = False
 
@@ -63,12 +66,26 @@ def main( INFO, tlev=0, fp_acum=1 ):
        print( fn_nat )
        sys.exit()
 
+    if DEBUG:
+       # debug
+       fn_Him8 = "/data_honda01/honda/SCALE-LETKF/scale-LT/OUTPUT/2000m_NODA_0723/20010101010000/fcst/mean/radar_20010101010000_mean.nc"
+       nc = Dataset( fn_Him8, 'r', format='NETCDF4')
+       Him8_nat = nc.variables["z"][6,10,:,:]
+       nc.close()
+
     x2d, y2d = np.meshgrid( INFO["Y"]*0.001, INFO["X"]*0.001 )
 
 
 
     if HIST:
        #print( "all:",fp_mem[ fp_mem > 300 ] )
+
+       cmap = plt.cm.get_cmap("RdBu_r")
+       cmap.set_over('gray', alpha=1.0)
+       cmap.set_under('gray', alpha=1.0)
+
+
+       levs = np.arange( -4, 4.5, 0.5 ) 
 
        ng2 = int( ng / 2 )
 
@@ -81,7 +98,11 @@ def main( INFO, tlev=0, fp_acum=1 ):
           fp_nat_ = np.log( fp_nat_ + log_c )
 
        ob = fp_nat_ - np.mean( eglm_, axis=0 )
- 
+       if DEBUG:
+          ob = Him8_nat[::ng,::ng]  # debug    
+          levs = np.arange( 20, 60, 5 ) 
+          cmap = plt.cm.get_cmap("jet")
+
        x2d_ = x2d[ng2::ng,ng2::ng]
        y2d_ = y2d[ng2::ng,ng2::ng]
    
@@ -118,11 +139,6 @@ def main( INFO, tlev=0, fp_acum=1 ):
 
        oerr = 1.0
   
-       cmap = plt.cm.get_cmap("RdBu_r")
-       cmap.set_over('gray', alpha=1.0)
-       cmap.set_under('gray', alpha=1.0)
-
-       levs = np.arange( -4, 4.5, 0.5 ) 
    
        extend = 'both'
        norm = BoundaryNorm( levs, ncolors=cmap.N, clip=True )
@@ -216,9 +232,9 @@ def main( INFO, tlev=0, fp_acum=1 ):
                cb.ax.tick_params( labelsize=7 )
            
                xmin = 120
-               xmax = 260
-               ymin = 140
-               ymax = 280
+               xmax = 270
+               ymin = 120
+               ymax = 270
                ax2.set_xlim( xmin, xmax )
                ax2.set_ylim( ymin, ymax )
            
@@ -266,47 +282,47 @@ def main( INFO, tlev=0, fp_acum=1 ):
 
     sys.exit()
 
-    fig, ax1 = plt.subplots(1, 1, figsize=( 5.5, 5))
-    fig.subplots_adjust(left=0.15, bottom=0.1, right=0.9, top=0.95,
-                        wspace=0.4, hspace=0.2)
-
-
-#    cmap = cmap_jet = plt.cm.get_cmap( "hot_r" )
-#    levs = np.arange( 0, 5.0, 1.0 ) 
-
-
-    var = fp_nat-fp
-    SHADE = ax1.pcolormesh( x2d[::ng,::ng], y2d[::ng,::ng], var[::ng,::ng], 
-              cmap=cmap, vmin=np.min(levs), vmax=np.max(levs), )
-    print( np.max(fp) )
-
-    pos = ax1.get_position()
-    cb_h = pos.height * 0.9
-    cb_w = 0.01 # pos.width * 0.8
-    ax_cb = fig.add_axes( [pos.x1+0.01, pos.y0, cb_w, cb_h] )
-    cb = plt.colorbar( SHADE, cax=ax_cb, orientation = 'vertical', 
-                       ticks=levs, extend='max' )
-    cb.ax.tick_params( labelsize=6 )
-
-    xmin = 100
-    xmax = 300
-    ymin = 100
-    ymax = 300
-    ax1.set_xlim( xmin, xmax )
-    ax1.set_ylim( ymin, ymax )
-
-    ylab = "Y (km)"
-    ax1.set_ylabel( ylab, fontsize=12)
-
-    xlab = "X (km)"
-    ax1.set_xlabel( xlab, fontsize=12)
-
-    tit = "O-B {0:}".format( ctime.strftime('%H:%M:%S') )
-
-    fig.suptitle( tit, fontsize=14 )
-
-    plt.show()
-    sys.exit()
+#    fig, ax1 = plt.subplots(1, 1, figsize=( 5.5, 5))
+#    fig.subplots_adjust(left=0.15, bottom=0.1, right=0.9, top=0.95,
+#                        wspace=0.4, hspace=0.2)
+#
+#
+##    cmap = cmap_jet = plt.cm.get_cmap( "hot_r" )
+##    levs = np.arange( 0, 5.0, 1.0 ) 
+#
+#
+#    var = fp_nat-fp
+#    SHADE = ax1.pcolormesh( x2d[::ng,::ng], y2d[::ng,::ng], var[::ng,::ng], 
+#              cmap=cmap, vmin=np.min(levs), vmax=np.max(levs), )
+#    print( np.max(fp) )
+#
+#    pos = ax1.get_position()
+#    cb_h = pos.height * 0.9
+#    cb_w = 0.01 # pos.width * 0.8
+#    ax_cb = fig.add_axes( [pos.x1+0.01, pos.y0, cb_w, cb_h] )
+#    cb = plt.colorbar( SHADE, cax=ax_cb, orientation = 'vertical', 
+#                       ticks=levs, extend='max' )
+#    cb.ax.tick_params( labelsize=6 )
+#
+#    xmin = 100
+#    xmax = 300
+#    ymin = 100
+#    ymax = 300
+#    ax1.set_xlim( xmin, xmax )
+#    ax1.set_ylim( ymin, ymax )
+#
+#    ylab = "Y (km)"
+#    ax1.set_ylabel( ylab, fontsize=12)
+#
+#    xlab = "X (km)"
+#    ax1.set_xlabel( xlab, fontsize=12)
+#
+#    tit = "O-B {0:}".format( ctime.strftime('%H:%M:%S') )
+#
+#    fig.suptitle( tit, fontsize=14 )
+#
+#    plt.show()
+#    sys.exit()
 
 
 def write_nature_fp2d( INFO, tlev=0, fp_acum=1 ):
