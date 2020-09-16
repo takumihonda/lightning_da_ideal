@@ -16,7 +16,7 @@ from matplotlib.colors import BoundaryNorm
 from tools_LT import read_evar_only, setup_12p
 
 quick = True
-quick = False
+#quick = False
 
 def read_vars( INFO, tlev=0, HIM8=True ):
 
@@ -230,7 +230,7 @@ def main( INFO, EXPG="2000m_DA_0306", EXPA="2000m_DA_0306", REXP="2000m_NODA_060
     xmin = 120
     xmax = 280
     ymin = 120
-    ymax = 320
+    ymax = 280
     zmin = 0.0
     zmax = 15.0
 
