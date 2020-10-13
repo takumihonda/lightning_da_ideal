@@ -125,6 +125,12 @@ exp = "2000m_DA_0723_FP_30min_LOC10km_VLOCW20"
 
 exp = "2000m_DA_0723_FP_30min_LOC10km_VLOC30km"
 
+exp = "2000m_DA_0723_FP_30min_LOC30km_X183km_Y199km"
+
+exp = "2000m_DA_0723_Z20km_FP_30min_LOC30km"
+exp = "2000m_DA_0723_FP_30min_LOC30km_COERR0.2"
+exp = "2000m_DA_0723_FP_30min_LOC20km"
+
 stime = datetime(2001,1,1,1,40) 
 
  

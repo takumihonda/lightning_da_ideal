@@ -15,10 +15,10 @@ DEBUG = True
 DEBUG = False
 
 quick = True
-#quick = False
+quick = False
 
 LOG = False
-#LOG = True
+LOG = True
 log_c = 0.1
 
 HIST = True
@@ -190,7 +190,7 @@ def main( INFO, tlev=0, fp_acum=1 ):
                gues = np.mean(eglm_[:,j,i] )
                ax1.vlines( x=gues, ymin=hymin, ymax=hymax,
                       ls="dashed", lw=2.5, 
-                      label="B ({0:.2f})".format( gues ), 
+                      label=r'B ({0:.2f}, $\sigma_b$:{1:.2f})'.format( gues, std ), 
                       color='gray', alpha=0.8 )
                       
    #            ax1.vlines( x=[ gues-std, gues+std ], ymin=hymin, ymax=hymax,

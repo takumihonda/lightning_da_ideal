@@ -16,7 +16,7 @@ from matplotlib.colors import BoundaryNorm
 from tools_LT import read_evar_only, setup_12p
 
 quick = True
-#quick = False
+quick = False
 
 def read_vars( INFO, tlev=0, HIM8=True ):
 
@@ -89,7 +89,7 @@ def main( INFO, EXPG="2000m_DA_0306", EXPA="2000m_DA_0306", REXP="2000m_NODA_060
     ew_nat = read_evar_only( INFO, tlev=tlev_nat, vname="W" )
     qh_nat = read_evar_only( INFO, tlev=tlev_nat, vname=vname1 ) * 1.e3
  
-    if vname2 == "W":
+    if vname2 == "W" or vname2 == "V":
        eqh_exp1 = eqh_exp1 / 1.e3
        eqh_exp2 = eqh_exp2 / 1.e3
        qh_nat = qh_nat / 1.e3
@@ -154,7 +154,7 @@ def main( INFO, EXPG="2000m_DA_0306", EXPA="2000m_DA_0306", REXP="2000m_NODA_060
     if vname2 == "QCRG" or vname2 == "CR":
        levs_rb_qcrg = np.array([-0.4, -0.3, -0.2, -0.1, -0.05, -0.01,
                                0.01, 0.05, 0.1, 0.2, 0.3, 0.4, ])
-    elif vname2 == "W":
+    elif vname2 == "W" or vname2 == "V":
        levs_rb_qcrg = np.array([-75, -60, -45, -30, -15, -5,
                                5, 15, 30, 45, 60, 75, ])
        levs_rb_qcrg_ainc = np.array([ -10, -8, -6, -4, -2, -1,
@@ -177,7 +177,7 @@ def main( INFO, EXPG="2000m_DA_0306", EXPA="2000m_DA_0306", REXP="2000m_NODA_060
 
     if vname1 == "QHYD":
        levs_dbz = np.array([0.5, 1, 2, 4, 6, 8, 10, 12, 14, 16])
-    elif vname1 == "V":
+    elif vname1 == "V" or vname1 == "U":
        levs_dbz = np.array([-75, -60, -45, -30, -15, -5,
                                5, 15, 30, 45, 60, 75, ])
        levs_dbz_ai = np.array([ -10, -8, -6, -4, -2, -1,
@@ -605,6 +605,15 @@ EXPA = "2000m_DA_0723_FP_30min_LOC30km"
 #EXPA = "2000m_DA_0723_FP_30min_LOC10km_LOG"
 #EXPA = "2000m_DA_0723_FP_30min_LOC10km_VLOCW20"
 
+EXPA = "2000m_DA_0723_FP_30min_LOC30km_X183km_Y199km"
+EXPA = "2000m_DA_0723_Z20km_FP_30min_LOC30km"
+
+EXPA = "2000m_DA_0723_FP_30min_LOC30km_COERR0.2"
+EXPA = "2000m_DA_0723_FP_30min_LOC20km"
+
+obsx = 183.0
+obsy = 199.0
+
 EXPG = "2000m_DA_0723_NOFP_30min"
 
 REXP = "2000m_NODA_0723"
@@ -634,6 +643,7 @@ vname2_l = [ "W", "CR",
              "CS",
              "QCRG",
             ]
+
 
 zlev_min = 10
 zlev_max = 28
