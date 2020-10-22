@@ -131,6 +131,16 @@ exp = "2000m_DA_0723_Z20km_FP_30min_LOC30km"
 exp = "2000m_DA_0723_FP_30min_LOC30km_COERR0.2"
 exp = "2000m_DA_0723_FP_30min_LOC20km"
 
+exp = "2000m_DA_0723_FP_30min_LOC20km_X159km_Y231km"
+exp = "2000m_DA_0723_FP_30min_LOC20km_X159km_Y207km"
+
+exp = "2000m_DA_0723_FP_30min_LOC20km_M240"
+
+exp = "2000m_DA_0723_FP_30min_LOC20km_M240_NOG"
+
+exp = "2000m_DA_0723_FP_30min_LOC20km_M240_NOG_guess"
+
+exp = "2000m_DA_0723_FP_30min_LOC20km_M240_NOCLROBS"
 stime = datetime(2001,1,1,1,40) 
 
  

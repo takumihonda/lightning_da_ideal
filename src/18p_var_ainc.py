@@ -54,6 +54,7 @@ def main( INFO, EXPG="2000m_DA_0306", EXPA="2000m_DA_0306", REXP="2000m_NODA_060
     if typ is not "fcst":
        ctime = datetime(2001, 1, 1, 1, 0) + timedelta(seconds=INFO["DT"]*tlev ) 
 
+    print( EXPG )
     INFO["EXP"] = EXPG
     INFO["MEM"] = "mean"
     INFO["TYPE"] = typ
@@ -66,6 +67,8 @@ def main( INFO, EXPG="2000m_DA_0306", EXPA="2000m_DA_0306", REXP="2000m_NODA_060
     eqh_exp1 = read_evar_only( INFO, tlev=tlev, vname=vname1 ) * 1.e3
     efp_exp1 = read_evar_only( INFO, tlev=tlev, vname="FP" )
 
+    print( "" )
+    print( EXPA )
     INFO["EXP"] = EXPA
     tbb_exp2, z_exp2, vr_exp2 = read_vars( INFO, tlev=tlev, HIM8=False )
     evar_exp2 = read_evar_only( INFO, tlev=tlev, vname=vname2 )
@@ -614,6 +617,15 @@ EXPA = "2000m_DA_0723_FP_30min_LOC20km"
 obsx = 183.0
 obsy = 199.0
 
+EXPA = "2000m_DA_0723_FP_30min_LOC20km_X159km_Y231km"
+EXPA = "2000m_DA_0723_FP_30min_LOC20km_M240"
+
+EXPA = "2000m_DA_0723_FP_30min_LOC20km_M240_NOG"
+EXPA="2000m_DA_0723_FP_30min_LOC20km_M240_NOCLROBS"
+obsx = 159.0
+obsy = 231.0
+
+
 EXPG = "2000m_DA_0723_NOFP_30min"
 
 REXP = "2000m_NODA_0723"
@@ -644,6 +656,8 @@ vname2_l = [ "W", "CR",
              "QCRG",
             ]
 
+vname1_l = [ "QG" ]
+vname2_l = [ "CG" ]
 
 zlev_min = 10
 zlev_max = 28

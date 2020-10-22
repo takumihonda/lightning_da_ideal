@@ -38,35 +38,79 @@ def read_lt2d_grads_e( dtop="", emax=320, ):
 
     return( elt2d )
 
-def main( INFO, fp_acum=6, top="", mem_min=32 ):
+def get_obs2d( INFO, time=datetime(2001,1,1,1,0), ng=4 ):
+    fn = "/data_honda01/honda/SCALE-LETKF/scale-LT/OUTPUT/2000m_NODA_0723_30min/20010101010000/fcst/mean/obs/" + time.strftime('fp_%Y%m%d%H%M%S.dat')
 
-    # nature run
-    INFO["EXP"] = "2000m_NODA_0723"
-    INFO["time0"] = datetime( 2001, 1, 1, 1, 0, 0 )
-    tlev = 12
+    infile = open( fn )
 
-    ctime = INFO["time0"] + timedelta( seconds=INFO["DT"]*tlev )
+    gx = INFO["XDIM"]
+    gy = INFO["YDIM"]
+    gz = INFO["ZDIM"]
 
-    fn_nat = os.path.join( INFO["GTOP"], INFO["EXP"], INFO["time0"].strftime('%Y%m%d%H%M%S'), "fcst",
-                  "fp_acum{0:0=2}.nc".format( fp_acum) )
-    print( fn_nat )
+    cnt2d = gx*gy
+    cnt3d = gx*gy*gz
+    infile.seek(cnt3d*2*4) # skip two 3D variables( fp3d & err3d)
 
-    try:
-       nc = Dataset( fn_nat, 'r', format='NETCDF4')
-       fp_nat = nc.variables["fp"][:,:]
-       nc.close()
-    except:
-       print( "Failed to get natunre run")
-       print( fn_nat )
-       sys.exit()
+    tmp2d = np.fromfile( infile, dtype=np.dtype('<f4'), count=cnt2d )
+    fp2d = np.reshape( tmp2d, (gy, gx) )
 
-    ng = 4
-    ng2 = int( ng / 2 )
+    tmp2d = np.fromfile( infile, dtype=np.dtype('<f4'), count=cnt2d )
+    err2d = np.reshape( tmp2d, (gy, gx) )
+
+    OBSERR_FP_TRUE = 1.0
+    err2d_ = np.where( fp2d < 1.0e-6, 0.0, err2d*OBSERR_FP_TRUE )
+
     ng2 = ng - 1
 
-    fp_nat_ = fp_nat[ng2::ng,ng2::ng]
+    return( fp2d[ng2::ng,ng2::ng] + err2d_[ng2::ng,ng2::ng] )
 
+def main( INFO, fp_acum=6, mem_min=32, single=False, sx=100, sy=100 ):
 
+    top = os.path.join( INFO["TOP"], INFO["time0"].strftime('%Y%m%d%H%M%S') )
+    exp_ = INFO["EXP"]
+
+    print( top )
+
+    obs2d = get_obs2d( INFO, time=INFO["time0"], ng=4 )
+#    print( "DEBUG" )
+#    print( np.min( obs2d ) )
+#    print( obs2d[ obs2d < 0.0 ] )
+#    print( len( obs2d[ obs2d > 0.0 ] ) )
+#    print( obs2d.size )
+#    sys.exit()
+
+#    print( obs2d.shape )
+#    sys.exit()
+#
+#    # nature run
+#    INFO["EXP"] = "2000m_NODA_0723"
+#    INFO["time0"] = datetime( 2001, 1, 1, 1, 0, 0 )
+#    tlev = 12
+#
+#    ctime = INFO["time0"] + timedelta( seconds=INFO["DT"]*tlev )
+#
+#    fn_nat = os.path.join( INFO["GTOP"], INFO["EXP"], INFO["time0"].strftime('%Y%m%d%H%M%S'), "fcst",
+#                  "fp_acum{0:0=2}.nc".format( fp_acum) )
+#    print( fn_nat )
+#
+#    try:
+#       nc = Dataset( fn_nat, 'r', format='NETCDF4')
+#       fp_nat = nc.variables["fp"][:,:]
+#       nc.close()
+#    except:
+#       print( "Failed to get natunre run")
+#       print( fn_nat )
+#       sys.exit()
+#
+#    ng = 4
+#    ng2 = int( ng / 2 )
+#    ng2 = ng - 1
+#
+#    fp_nat_ = fp_nat[ng2::ng,ng2::ng]
+#
+ 
+    fp_nat_ = obs2d
+   
     dtop = os.path.join( top, "gues" )
     elt2d_g = read_lt2d_grads_e( dtop=dtop, emax=320, )
 
@@ -108,6 +152,13 @@ def main( INFO, fp_acum=6, top="", mem_min=32 ):
     for cx in range( lxdim ):
        for cy in range( lydim ):
 
+          x_ = cx*8 + 7
+          y_ = cy*8 + 7
+
+          if single:
+             if x_ != int( sx ) or y_ != int( sy ):
+                continue
+
           gdat = elt2d_g[:,cy,cx]    
           adat = elt2d_a[:,cy,cx]    
           
@@ -115,9 +166,10 @@ def main( INFO, fp_acum=6, top="", mem_min=32 ):
           std_g = np.std( gdat, axis=0, ddof=1 )
           std_a = np.std( adat, axis=0, ddof=1 )
 
-          print( "std: {0:.2f}, {1:.2f}, cnt:{2:}".format( std_g, std_a, int( cnt2d_g[cy,cx] ) ) )
           if cnt2d_g[cy,cx] < mem_min:
              continue
+          print( "std: {0:.2f}, {1:.2f}, cnt:{2:}, obs{3:.2f}".format( std_g, std_a, int( cnt2d_g[cy,cx] ), fp_nat_[cy,cx] ) )
+
           fig, (ax1,ax2) = plt.subplots( 1, 2, figsize=( 10.5, 5 ) )
           fig.subplots_adjust( left=0.06, bottom=0.1, right=0.94, top=0.9,
                           wspace=0.2, hspace=0.3 )
@@ -126,8 +178,6 @@ def main( INFO, fp_acum=6, top="", mem_min=32 ):
 
           tit_l = [ "guess", "anal" ]
 
-          x_ = cx*8 + 5
-          y_ = cy*8 + 5
           tit = "LT2d (x={0:.0f}km, y={1:.0f}km), fmem:{2:.0f}".format( x_, y_, cnt2d_g[cy,cx] )
           fig.suptitle( tit, fontsize=12 )
 
@@ -139,6 +189,8 @@ def main( INFO, fp_acum=6, top="", mem_min=32 ):
 
           err_reduction = np.abs(  fp_nat_[cy,cx] - np.mean( dat_l[0] ) ) \
                          -np.abs(  fp_nat_[cy,cx] - np.mean( dat_l[1] ) ) 
+
+          err_reduction_rate = err_reduction / np.abs(  fp_nat_[cy,cx] - np.mean( dat_l[0] ) )
 
           for i, ax in enumerate( ax_l ):
               mean = np.mean( dat_l[i] )
@@ -179,7 +231,7 @@ def main( INFO, fp_acum=6, top="", mem_min=32 ):
                        va='top', )
 
               if i == 1:
-                 note = 'Error reduction:{0:.2f}'.format( err_reduction )
+                 note = 'Error reduction:{0:+.2f}\nRate:{1:+.0f}%'.format( err_reduction, err_reduction_rate*100 )
                  ax.text( 0.99, 0.7, note,
                           fontsize=11, transform=ax.transAxes,
                           ha='right',
@@ -195,14 +247,14 @@ def main( INFO, fp_acum=6, top="", mem_min=32 ):
               ax.set_xlabel( xlab, fontsize=10 )
               ax.set_ylabel( ylab, fontsize=10 )
 
-              # nature run
-              note = 'Truth: {0:.2f}'.format( fp_nat_[cy,cx], )
+              # obs
+              note = 'Obs: {0:.2f}'.format( fp_nat_[cy,cx], )
               ax.vlines( ymin=ymin, ymax=ymax, x=fp_nat_[cy,cx], ls='solid', 
                          color='b', label=note  )
 
               ax.legend( loc='upper right', fontsize=12 )
 
-          odir = "png/hist"
+          odir = "png/hist_{0:}".format( exp_ )
           ofig = "2p_hist_lt2d_x{0:0=3}_y{1:0=3}.png".format( cx, cy)
           print( ofig )
           if not quick:
@@ -238,14 +290,17 @@ Z = np.arange(DZ*0.5, DZ*ZDIM, DZ)
 
 
 
-EXP = "2000m_DA_0723"
-
-time0 = datetime( 2001, 1, 1, 1, 30, 0 )
+EXP = "2000m_DA_0723_FP_30min_LOC20km"
+EXP = "2000m_DA_0723_FP_30min_LOC20km_M240"
+#EXP = "2000m_DA_0723_FP_30min_LOC20km_X159km_Y207km"
+#EXP = "2000m_DA_0723_FP_30min_LOC20km_X159km_Y231km"
 
 TOP = "/data_honda01/honda/SCALE-LETKF/scale-LT/OUTPUT/" + EXP
 GTOP = "/data_honda01/honda/SCALE-LETKF/scale-LT/OUTPUT"
 TYPE = "fcst"
 time00 = datetime( 2001, 1, 1, 0, 0, 0 )
+
+time0 = datetime( 2001, 1, 1, 2, 0, 0 )
 
 INFO = {"XDIM":XDIM, "YDIM":YDIM, "NBAND":10, "TDIM":TDIM,
         "X":X, "Y":Y , "BAND":BAND, "T":T, "TOP":TOP, "GTOP":GTOP,
@@ -256,6 +311,10 @@ INFO = {"XDIM":XDIM, "YDIM":YDIM, "NBAND":10, "TDIM":TDIM,
 
 fp_acum = 6
 mem_min = 32
+mem_min = 240
 
-top = "/data_honda01/honda/SCALE-LETKF/scale-LT/OUTPUT/2000m_DA_0723_FP_30min_LOC20km/20010101020000"
-main( INFO, fp_acum=fp_acum, top=top, mem_min=mem_min )
+single = True
+single = False
+sx = 159
+sy = 207
+main( INFO, fp_acum=fp_acum, mem_min=mem_min, single=single, sx=sx, sy=sy )
