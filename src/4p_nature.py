@@ -14,7 +14,7 @@ import matplotlib.patches as patches
 from matplotlib.colors import BoundaryNorm
 
 quick = True
-#quick = False
+quick = False
 
 def read_vars( INFO, tlev=0, acm_fp=1 ):
 
@@ -69,9 +69,6 @@ def main( INFO, tlev=0, acm_fp=1 ):
     ctime = INFO["time0"] + timedelta( seconds = int( tlev ) * INFO["DT"] )
     ft_sec =  int( (ctime - INFO["time00"] ).total_seconds() )
 
-#    fig, ( (ax1,ax2,ax3,ax4), (ax5,ax6,ax7,ax8) ) = \
-#    plt.subplots(2, 4, figsize=(14,7.2))
-
     fig = plt.figure( figsize=(9.5, 9.5) )
     gs = gridspec.GridSpec(85, 100) # v:h
 
@@ -107,9 +104,9 @@ def main( INFO, tlev=0, acm_fp=1 ):
     hmin4 = hmin + dh + pdh 
     ax4 = plt.subplot(   gs[vmax3:vmax3+dv,hmin4:hmin4+dh] )
 
-    hmin5 = hmin + ( dh + pdh )*2
-    ax5 = plt.subplot(   gs[vmax3:vmax3+dv,hmin5:hmin5+dh] )
-    print( "ax5", vmax3,vmax3+dv,hmin5,hmin5+dh)
+#    hmin5 = hmin + ( dh + pdh )*2
+#    ax5 = plt.subplot(   gs[vmax3:vmax3+dv,hmin5:hmin5+dh] )
+#    print( "ax5", vmax3,vmax3+dv,hmin5,hmin5+dh)
 
 
     fig.subplots_adjust( left = 0.05, right=0.98, top=0.94, bottom=0.1 )
@@ -117,8 +114,8 @@ def main( INFO, tlev=0, acm_fp=1 ):
     #                     wspace=0.0, hspace=0.0 )
 
 
-    ax_l = [ ax1, ax2, ax3, ax4, ax5, 
-             ax1_r, ax1_t, ax2_r, ax2_t ] #,ax2,ax3,ax4,ax5,ax6, ] #, ax5,ax6,ax7,ax8 ]
+    ax_l = [ ax1, ax2, ax3, ax4, 
+             ax1_r, ax1_t, ax2_r, ax2_t ] 
 
     colors1 = plt.cm.jet_r(np.linspace(0, 1, 128))
     colors2 = plt.cm.binary(np.linspace(0., 1, 128)) # w/k
@@ -169,7 +166,6 @@ def main( INFO, tlev=0, acm_fp=1 ):
               "XY_s",
               "XY_s",
               "XY",
-              "XY",
               "XY_skip",
               "YZ",
               "XZ",
@@ -181,7 +177,6 @@ def main( INFO, tlev=0, acm_fp=1 ):
               "Radar",
               fp_note + "BOLT (3D flash)", 
               r'IR (10.4$\mu$m)', 
-              "Surface Ez", 
               fp_note + "GLM (2D flash)", 
               "",
               "",
@@ -201,7 +196,6 @@ def main( INFO, tlev=0, acm_fp=1 ):
                '(dBZ)', 
                '(flash/' + str( int( INFO["DT"]*acm_fp/60.0 ) ) + r'min)',
                '(K)', 
-               '(kV/m)', # E
                '(flash/' + str( int( INFO["DT"]*acm_fp/60.0 ) ) + r'min)', # GLM
                '(dBZ)', 
                '(dBZ)', 
@@ -217,7 +211,6 @@ def main( INFO, tlev=0, acm_fp=1 ):
               z[zlev,:,:], 
               np.sum(fp[:,:,:], axis=0 ), # BOLT
               tbb[13-7,:,:], 
-              e_tot[0,:,:]*0.001,
               ndimage.convolve( np.sum( fp[:,:,:], axis=0 ), kernel, mode='reflect' ),  # GLM
               np.transpose( z[:,:,max_yx[1]] ), # radar YZ
               z[:,max_yx[0],:], # radar XZ
@@ -229,7 +222,6 @@ def main( INFO, tlev=0, acm_fp=1 ):
                  levs_dbz, 
                  levs_fp, 
                  levs_tbb, 
-                 levs_e,   # E
                  levs_fp,  # GLM
                  levs_dbz,
                  levs_dbz,
@@ -239,7 +231,6 @@ def main( INFO, tlev=0, acm_fp=1 ):
                cmap_dbz,
                cmap_fp, 
                cmap_tbb, 
-               cmap_e,   # E
                cmap_fp,  # GLM
                cmap_dbz, 
                cmap_dbz, 
@@ -247,13 +238,8 @@ def main( INFO, tlev=0, acm_fp=1 ):
                cmap_fp, 
                ]
 
-#    xmin_l = 120 - 10
-#    xmax_l = 300 - 10
-#    ymin_l = 140 - 10
-#    ymax_l = 320 - 10 
-
-    xmin_l = 120 - 20
-    xmax_l = 300 - 20
+    xmin_l = 120 - 20 + 10
+    xmax_l = 300 - 20 + 10
     ymin_l = 140 - 20
     ymax_l = 320 - 20 
 
@@ -353,14 +339,14 @@ def main( INFO, tlev=0, acm_fp=1 ):
                         colors="k",linestyles='dotted',linewidths=1.0 )
 
        #if idx == 0 or idx == 4:
-       if ax is ax1 or ax is ax2 or ax is ax3 or ax is ax4 or ax is ax5:
+       if ax is ax1 or ax is ax2 or ax is ax3 or ax is ax4:
           ax.vlines( x=INFO["X"][max_yx[1]]*0.001, ymin=ymin, ymax=ymax,
                      colors="k",linestyles='dotted',linewidths=1.0 )
           ax.hlines( y=INFO["Y"][max_yx[0]]*0.001, xmin=xmin, xmax=xmax,
                      colors="k",linestyles='dotted',linewidths=1.0 )
 
-       ax.set_xlabel( xlabel, fontsize=6 )
-       ax.set_ylabel( ylabel, fontsize=6 )
+       ax.set_xlabel( xlabel, fontsize=8 )
+       ax.set_ylabel( ylabel, fontsize=8 )
 
        x2d, y2d = np.meshgrid( yaxis, xaxis )
 
@@ -370,7 +356,7 @@ def main( INFO, tlev=0, acm_fp=1 ):
 
        norm = BoundaryNorm( levels_l[idx], ncolors=cmap_l[idx].N, clip=True )
 
-       if ax is ax2 or ax is ax5 or ax is ax2_t or ax is ax2_r:
+       if ax is ax2 or ax is ax4 or ax is ax2_t or ax is ax2_r:
           SHADE = ax.pcolormesh(x2d, y2d,
                                 VAR_l[idx][jmin::nskip,imin::nskip],
                                 vmin=np.min(levels_l[idx]),
@@ -392,8 +378,8 @@ def main( INFO, tlev=0, acm_fp=1 ):
        ax.set_ylim( ymin, ymax )
        ax.xaxis.set_ticks( np.arange(xmin, xmax, xdgrid) )
        ax.yaxis.set_ticks( np.arange(ymin, ymax, ydgrid) )
-       ax.tick_params(axis='both', which='minor', labelsize=6 )
-       ax.tick_params(axis='both', which='major', labelsize=6 )
+       ax.tick_params(axis='both', which='minor', labelsize=7 )
+       ax.tick_params(axis='both', which='major', labelsize=7 )
 
 
 #          ax.set_ylabel( ylabel, fontsize=6 )
@@ -401,7 +387,6 @@ def main( INFO, tlev=0, acm_fp=1 ):
        ax.grid( axis='both', ls='dashed', lw=0.2 )
 
        tskip = 1
-       #if ax is ax2 or ax is ax3 or ax is ax4 or ax is ax5:
        if ax is ax3 or ax is ax4:
           tskip = 2
 
@@ -433,7 +418,7 @@ def main( INFO, tlev=0, acm_fp=1 ):
 #          ax.tick_params( labelleft=False ) 
 
        ax.text(0.5, 0.95, tit_l[idx],
-               fontsize=10, transform=ax.transAxes,
+               fontsize=11, transform=ax.transAxes,
                horizontalalignment='center',
                verticalalignment='top', 
                bbox=bbox )
@@ -458,8 +443,8 @@ def main( INFO, tlev=0, acm_fp=1 ):
     fig.suptitle( "Nature run", fontsize=18 )
 
 
-    odir = "png/9p_obs_" + INFO["EXP"]
-    ofig =  "9p_nature_obs_t{0:0=5}_acm_fp{1:0=2}".format( ft_sec, acm_fp )
+    odir = "png/fig1204/4p_obs_" + INFO["EXP"]
+    ofig =  "4p_nature_obs_t{0:0=5}_acm_fp{1:0=2}".format( ft_sec, acm_fp )
 
     print( ofig, odir )
  

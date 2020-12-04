@@ -834,19 +834,19 @@ def read_evars( INFO, tlev=0, vname="QG", member=80 ):
     # Radar
     try:
        ez = read_evar4d_nc( INFO, vname="Z", tlev=tlev, typ="fcst", stime=INFO["time0"] )
-       evr = read_evar4d_nc( INFO, vname="VR", tlev=tlev, typ="fcst", stime=INFO["time0"] )
+#       evr = read_evar4d_nc( INFO, vname="VR", tlev=tlev, typ="fcst", stime=INFO["time0"] )
     except:
        fn_radar = os.path.join( INFO["TOP"], INFO["time0"].strftime('%Y%m%d%H%M%S'), INFO["TYPE"], "mean",
                           "radar_" + INFO["time0"].strftime('%Y%m%d%H%M%S_') + "mean" + ".nc")
        nc = Dataset(fn_radar, 'r', format='NETCDF4')
        z = nc.variables["z"][tlev,:,:,:]
-       vr = nc.variables["vr"][tlev,:,:,:]
+#       vr = nc.variables["vr"][tlev,:,:,:]
        nc.close()
 
        ez = np.zeros( (member+1,z.shape[0],z.shape[1],z.shape[2]) )
-       evr = np.zeros( (member+1,vr.shape[0],vr.shape[1],vr.shape[2]) )
+#       evr = np.zeros( (member+1,vr.shape[0],vr.shape[1],vr.shape[2]) )
        ez[0,:,:,:] = z[:]
-       evr[0,:,:,:] = vr[:]
+#       evr[0,:,:,:] = vr[:]
 
        for m in range(1, member+1):
            mem = str(m).zfill(4)
@@ -855,20 +855,20 @@ def read_evars( INFO, tlev=0, vname="QG", member=80 ):
 
            nc = Dataset(fn_radar, 'r', format='NETCDF4')
            z_ = nc.variables["z"][tlev,:,:,:]
-           vr_ = nc.variables["vr"][tlev,:,:,:]
+#           vr_ = nc.variables["vr"][tlev,:,:,:]
            nc.close()
 
            ez[m,:,:,:] = z_[:]
-           evr[m,:,:,:] = vr_[:]
+#           evr[m,:,:,:] = vr_[:]
 
        write_evar4d_nc(ez, INFO, vname="Z", tlev=tlev, typ="fcst", stime=INFO["time0"] )
-       write_evar4d_nc(evr, INFO, vname="VR", tlev=tlev, typ="fcst", stime=INFO["time0"] )
+#       write_evar4d_nc(evr, INFO, vname="VR", tlev=tlev, typ="fcst", stime=INFO["time0"] )
 
     # Flash point
     efp = read_evar4d_nc( INFO, vname="FP", tlev=tlev, typ="fcst", stime=INFO["time0"] )
 
     # Electric field
-    ee = read_evar4d_nc( INFO, vname="EZ", tlev=tlev, typ="fcst", stime=INFO["time0"] )
+#    ee = read_evar4d_nc( INFO, vname="EZ", tlev=tlev, typ="fcst", stime=INFO["time0"] )
 
 #    try:
 #       ee = read_evar4d_nc( INFO, vname="EABS", tlev=tlev, typ="fcst", stime=INFO["time0"] )
@@ -906,7 +906,7 @@ def read_evars( INFO, tlev=0, vname="QG", member=80 ):
          ee = np.sqrt( ee )
          write_evar4d_nc(ee, INFO, vname="EABS", tlev=tlev, typ="fcst", stime=INFO["time0"] )
 
-    return( etbb, ez, evr, efp, ee, evar )
+    return( etbb, ez, efp, evar )
 
 def get_ecor1d( var1d, evar ):
 
