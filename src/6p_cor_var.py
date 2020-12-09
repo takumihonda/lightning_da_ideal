@@ -17,7 +17,9 @@ quick = True
 #quick = False
 
 
-def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True, zlev_show=10, zlev_tgt=10, mmem=0, fp_acum=1 ):
+def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True, zlev_show=10, zlev_tgt=10, mmem=0, fp_acum=1, 
+          vname1="QG", vname2="QS", vname3="T" ):
+
 
     cx = cx_l[0]
     cy = cy_l[0]
@@ -27,67 +29,35 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
        mmem_ = 0
 
     # read obs variables & ens variables
-    etbb, ez, efp, evar = read_evars( INFO, tlev=tlev, vname=vname, member=member )
+    etbb, ez, efp, evar1 = read_evars( INFO, tlev=tlev, vname=vname1, member=member )
+
+    ac1 = 0
+    ac2 = 1
+    ac3 = 5
+
+    # debug
+    if quick:
+       ac2 = 0
+       ac3 = 0
+       fp_acum = 1
+
+    _, _, _, evar2 = read_evars( INFO, tlev=tlev, vname=vname2, member=member )
+    _, _, _, evar3 = read_evars( INFO, tlev=tlev, vname=vname3, member=member )
 
     for dt_ in range( 1, fp_acum ):
        _,  _, efp_, _ = read_evars( INFO, tlev=tlev-dt_, vname=vname, member=member )
        efp += efp_
-   
 
-    print( "Size", etbb.shape, ez.shape, efp.shape, evar.shape )
 
-#    # read ens variables
-#    evar = get_evar4d_nc( INFO, vname=vname, tlev=tlev, typ="fcst", stime=INFO["time0"] )
 
     if zlev_show < 0:
        zlev_show = 10
     if zlev_tgt < 0:
        zlev_tgt = 10
 
-    max_loc =  np.unravel_index(np.argmax( np.mean(ez[1:,zlev_tgt,:,:], axis=0) ), 
-               np.mean(ez[1:,zlev_tgt,:,:], axis=0).shape )
-    print("Z max:",max_loc, ez.shape)
-    cx = max_loc[1]
-    cy = max_loc[0]
-
-    fp_mean = np.mean( efp[1:,:,:,:], axis=0 )
-    max_loc_fp = np.unravel_index(np.argmax( fp_mean ) , 
-                                  fp_mean.shape )
-    max_loc_fp2d = np.unravel_index(np.argmax( np.sum(fp_mean, axis=0) ), 
-                                    np.sum(fp_mean, axis=0 ).shape )
-
-  
-    ew = read_evar4d_nc( INFO, vname="W", tlev=tlev, typ="fcst", stime=INFO["time0"] )
-    max_loc_w =  np.unravel_index(np.argmax( np.mean(ew[1:,zlev_tgt,:,:], axis=0) ), 
-                 np.mean(ew[1:,zlev_tgt,:,:], axis=0).shape )
-    cx = max_loc_w[1]
-    cy = max_loc_w[0]
-
-    #cx = max_loc_fp[2]
-    #cy = max_loc_fp[1]
-    #zlev_tgt = max_loc_fp[0] # target level 
-
-    #cx = max_loc_fp2d[1]
-    #cy = max_loc_fp2d[0]
-    #zlev_tgt = np.unravel_index(np.argmax( fp_mean[:,cy,cx] ), 
-    #                            fp_mean[:,cy,cx].shape )[0]
-
-
-    print("FP max:",max_loc_fp, efp.shape)
     print("zlev",zlev_tgt, zlev_show)
     print("")
 
-#    print("DEBUG")
-#    cx_l = np.arange( 102, 106)
-#    cy_l = np.arange( 110, 114)
-#    for cy in cy_l:
-#       for cx in cx_l:
-#          print("fp each levs", cx, cy, np.mean(efp[1:,:,cy,cx], axis=0) )
-#    sys.exit()
-
-#    if len(cx_l) < 2: 
-#       cx_l = [100, 120]
-#       cy_l = [90, 100, 120]
 
     band = 13
 
@@ -100,11 +70,11 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                ]
 
 
-    cvar_mean = np.mean( ez[1:,:,:,:], axis=0 )
 
 
     mcnt2d= np.sum( np.where( np.sum(efp[1:,:,:,:], axis=1) > 0.0, 1.0, 0.0 ) , axis=0 )
        
+    cvar_mean = np.mean( ez[1:,:,:,:], axis=0 )
 
     for cy in cy_l:
        for cx in cx_l:
@@ -129,59 +99,73 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
            ft_sec =  int( (ctime - INFO["time00"] ).total_seconds() )
            ft_sec_a = int( tlev * INFO["DT"] )
        
-           fig = plt.figure( figsize=(12.5, 8.5) ) # h:v
-           gs = gridspec.GridSpec(105, 155) # v:h
-       
-           fig.subplots_adjust( left = 0.05, right=0.99, top=0.94, bottom=0.08 )
-       
-           pdh = 5
-           dv = 30
-           pdv = 5
-    
-           dv_t = 10
-           dh = 30
-           dh_r = 10
-           hmin = 0
-           vmax = 0
-       
-           hmin1 = 0
-           vmax1 = vmax + dv_t + pdv
-           vmax1_t = vmax 
-           hmin1_r = hmin1 + dh + pdh
-           ax1 = plt.subplot(   gs[vmax1:vmax1+dv,hmin1:hmin1+dh] )
-           ax1_t = plt.subplot( gs[vmax1_t:vmax1_t+dv_t,    hmin1:hmin1+dh] )
-#           ax1_r = plt.subplot( gs[vmax1:vmax1+dv,  hmin1_r:hmin1_r+dh_r] )
-           print( "ax1", vmax1,vmax1+dv,hmin1,hmin1+dh)
-       
-           hmin2 = hmin1_r + dh_r + 2*pdh
-           hmin2_r = hmin2 + dh + pdh
-           ax2 = plt.subplot(   gs[vmax1:vmax1+dv,hmin2:hmin2+dh] )
-           ax2_t = plt.subplot( gs[vmax1_t:vmax1_t+dv_t,  hmin2:hmin2+dh] )
-#           ax2_r = plt.subplot( gs[vmax1:vmax1+dv,  hmin2_r:hmin2_r+dh_r] )
-       
-           hmin3 = hmin2_r + dh_r + 2*pdh
-           hmin3_r = hmin3 + dh + pdh
-           ax3 = plt.subplot(   gs[vmax1:vmax1+dv,hmin3:hmin3+dh] )
-           ax3_t = plt.subplot( gs[vmax1_t:vmax1_t+dv_t,  hmin3:hmin3+dh] )
-#           ax3_r = plt.subplot( gs[vmax1:vmax1+dv,  hmin3_r:hmin3_r+dh_r] )
-       
-           vmax4_t = vmax1 + dv + 2*pdv + pdv
-           vmax4 = vmax4_t + dv_t + pdv
-           ax4 = plt.subplot(   gs[vmax4:vmax4+dv,hmin1:hmin1+dh] )
-           ax4_t = plt.subplot( gs[vmax4_t:vmax4_t+dv_t,    hmin1:hmin1+dh] )
-#           ax4_r = plt.subplot( gs[vmax4:vmax4+dv,  hmin1_r:hmin1_r+dh_r] )
-       
-#           ax5 = plt.subplot(   gs[vmax4:vmax4+dv,       hmin2:hmin2+dh] )
-#           ax5_t = plt.subplot( gs[vmax4_t:vmax4_t+dv_t, hmin2:hmin2+dh] )
-#           ax5_r = plt.subplot( gs[vmax4:vmax4+dv,       hmin2_r:hmin2_r+dh_r] )
-#       
-#           ax6 = plt.subplot(   gs[vmax4:vmax4+dv,       hmin3:hmin3+dh] )
-#           ax6_t = plt.subplot( gs[vmax4_t:vmax4_t+dv_t, hmin3:hmin3+dh] )
-#           ax6_r = plt.subplot( gs[vmax4:vmax4+dv,       hmin3_r:hmin3_r+dh_r] )
        
        
-           ax_l = [ ax1, ax2, ax3, ax4, ax1_t, ax2_t, ax3_t,
-                    ax4_t, ] #ax5_r, ax5_t, ax6_r, ax6_t ]
+ 
+           dv = 8
+           dh = 8      
+           dv2 = 4
+           dh2 = 2
+
+           #v_tot = dv2 + 1 + dv + 2
+           #h_tot = dh + 2 + dh + 2 + dh 
+           v_tot = dv2 + 1 + dv + 2 + dv2 + 1 + dv + 2
+           h_tot = dh + 2 + dh + 2 + dh 
+
+           hsize = 8.0
+           vsize = hsize * v_tot / h_tot
+           fig = plt.figure( figsize=(hsize, vsize) )
+
+           gs = gridspec.GridSpec( 8, 5, 
+                                   height_ratios=( dv2, 1, dv, 2, dv2, 1, dv, 2 ), 
+                                   width_ratios=( dh, 2, dh, 2, dh ) )
+           axs = [ 
+                   plt.subplot(gs[0, 0]), 
+                   plt.subplot(gs[2, 0]),
+       
+                   plt.subplot(gs[0, 2]), 
+                   plt.subplot(gs[2, 2]), 
+       
+                   plt.subplot(gs[0, 4]), 
+                   plt.subplot(gs[2, 4]),
+
+                   plt.subplot(gs[4, 0]), 
+                   plt.subplot(gs[6, 0]),
+       
+                   plt.subplot(gs[4, 2]), 
+                   plt.subplot(gs[6, 2]), 
+       
+                   plt.subplot(gs[4, 4]), 
+                   plt.subplot(gs[6, 4]),
+                 ]
+
+           ax1_t = axs[0]
+           ax1 = axs[1]
+           ax2_t = axs[2]
+           ax2 = axs[3]
+           ax3_t = axs[4]
+           ax3 = axs[5]
+
+           ax4_t = axs[6]
+           ax4 = axs[7]
+
+           ax5_t = axs[8]
+           ax5 = axs[9]
+
+           ax6_t = axs[10]
+           ax6 = axs[11]
+
+           fig.subplots_adjust( left=0.06, right=0.94, top=0.94, bottom=0.06,
+                                wspace=0.0, hspace=0.0, 
+                              )
+       
+
+      
+
+           ax_l = [ ax1, ax2, ax3,  ax4, ax5, ax6, 
+                    ax1_t, ax2_t, ax3_t,
+                    ax4_t, ax5_t, ax6_t,
+                    ] #ax5_r, ax5_t, ax6_r, ax6_t ]
  
            cmap_rb = plt.cm.get_cmap("RdBu_r")
            cmap_rb.set_over('gray', alpha=1.0)
@@ -231,29 +215,24 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
 
            bbox = { 'facecolor':'w', 'alpha':1.0, 'pad':1.5, 'edgecolor':'w' }
        
-           var1d_tbb = etbb[:,band-7,cy,cx]
-           ecor_tbb = get_ecor( var1d_tbb, evar )
        
-           var1d_z = ez[:,zlev_tgt,cy,cx]
-           ecor_z = get_ecor( var1d_z, evar )
-       
-#           var1d_vr = evr[:,zlev_tgt,cy,cx]
-#           ecor_vr = get_ecor( var1d_vr, evar )
-       
-#           var1d_e = eetot[:,0,cy,cx]
-#           ecor_e = get_ecor( var1d_e, evar )
-       
-           var1d_fp = efp[:,zlev_tgt,cy,cx]
-           print( "var1d_fp", np.max(var1d_fp), np.min(var1d_fp) )
-           ecor_fp = get_ecor( var1d_fp, evar )
        
            eglm = get_eGLM( efp, kernel )
            var1d_glm = eglm[:,cy,cx]
-           ecor_glm = get_ecor( var1d_glm, evar )
+
+           ecor_glm1 = get_ecor( var1d_glm, evar1 )
+           ecor_glm2 = get_ecor( var1d_glm, evar2 )
+           ecor_glm3 = get_ecor( var1d_glm, evar3 )
        
+           var1d_tbb = etbb[:,band-7,cy,cx]
+           ecor_tbb1 = get_ecor( var1d_tbb, evar1 )
+           ecor_tbb2 = get_ecor( var1d_tbb, evar2 )
+           ecor_tbb3 = get_ecor( var1d_tbb, evar3 )
+       
+
            crs_l = [
-                     "XY_s", "XY_s", "XY_s", "XY_s", # "XY_s", "XY_s",
-                     "XZ", "XZ", "XZ", "XZ", #"YZ", "XZ",
+                     "XY_s", "XY_s", "XY_s",  "XY_s", "XY_s", "XY_s",
+                     "XZ", "XZ", "XZ", "XZ", "XZ", "XZ",
                   #   "YZ", "XZ", #"YZ", "XZ", "YZ", "XZ",
                    ]
        
@@ -261,26 +240,21 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
            if COR:
           
               VAR_l = [ 
-                        ecor_z[zlev_show,:,:],    # radar
-#                        ecor_vr[zlev_show,:,:],    # radar vr
-                        ecor_fp[zlev_show,:,:],   # fp
-                        ecor_tbb[zlev_show,:,:],  # tbb 
-#                        ecor_e[zlev_show,:,:],    # E sfc
-                        ecor_glm[zlev_show,:,:],    # GLM
+                        ecor_glm1[zlev_show,:,:],    # GLM
+                        ecor_glm2[zlev_show,:,:],    # GLM
+                        ecor_glm3[zlev_show,:,:],    # GLM
+                        ecor_tbb1[zlev_show,:,:],    # TBB
+                        ecor_tbb2[zlev_show,:,:],    # TBB
+                        ecor_tbb3[zlev_show,:,:],    # TBB
           
-#                        np.transpose( ecor_z[:,:,cx] ), # YZ
-                        ecor_z[:,cy,:], # XZ
-#                        np.transpose( ecor_vr[:,:,cx] ), # YZ
-#                        ecor_vr[:,cy,:], # XZ
-#                        np.transpose( ecor_fp[:,:,cx] ), # YZ
-                        ecor_fp[:,cy,:], # XZ
-#                        np.transpose( ecor_tbb[:,:,cx] ), # YZ
-                        ecor_tbb[:,cy,:], # XZ
-#                        np.transpose( ecor_e[:,:,cx] ), # YZ
-#                        ecor_e[:,cy,:], # XZ
-#                        np.transpose( ecor_glm[:,:,cx] ), # YZ
-                        ecor_glm[:,cy,:], # XZ
+                        ecor_glm1[:,cy,:], # XZ
+                        ecor_glm2[:,cy,:], # XZ
+                        ecor_glm3[:,cy,:], # XZ
+                        ecor_tbb1[:,cy,:], # XZ
+                        ecor_tbb2[:,cy,:], # XZ
+                        ecor_tbb3[:,cy,:], # XZ
                       ]
+
               cmap_l = [ cmap_rb, cmap_rb, cmap_rb, cmap_rb, cmap_rb, 
                          cmap_rb, cmap_rb, cmap_rb, cmap_rb, cmap_rb, 
                          cmap_rb, cmap_rb, cmap_rb, cmap_rb, cmap_rb, 
@@ -293,27 +267,12 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
        
               fig_tit =  "Ensemble-based correlations with " + vname 
        
-#              ofig =  "9p_cor_" + INFO["EXP"] + "_" + vname + "_obs_init" + INFO["time0"].strftime('%H%M') + "_t" \
-#                       + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) + "_x" + str(cx).zfill(3) + "_y" + str(cy).zfill(3) + "_zs" + str(zlev_show).zfill(2) + "_zt" + str(zlev_tgt).zfill(2) + "_mmem" + str( mmem_ ).zfill(4)
-              ofig =  "9p_cor_{0:}_{1:}_obs_init{2:}_t{3:}_ft{4:}_x{5:}_y{6:}_zs{7:}_zt{8:}_mmem{9:}_fpacum{10:}".format( INFO["EXP"], vname, INFO["time0"].strftime('%H%M'), \
+              ofig =  "6p_acm_var_{0:}_{1:}_{2:}_{3:}_obs_init{4:}_t{5:}_ft{6:}_x{7:}_y{8:}_zs{9:}_zt{10:}_mmem{11:}_fpacum{10:}".format( INFO["EXP"], vname1, vname2, INFO["time0"].strftime('%H%M'), \
                        str( ft_sec ).zfill(5), str( ft_sec_a ).zfill(5),  str(cx).zfill(3), str(cy).zfill(3),  str(zlev_show).zfill(2), str(zlev_tgt).zfill(2), str( mmem_ ).zfill(4), str(fp_acum).zfill(2) )
-              odir = "png/9p_cor_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
+              odir = "png/6p_acm_var_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
        
            else:
               VAR_l = [ 
-                        np.mean( ez[1:,zlev_show,:,:], axis=0 ), # radar
-#                        np.mean( evr[1:,zlev_show,:,:], axis=0 ), # radar vr
-                        np.mean( efp[1:,zlev_show,:,:], axis=0 ), # fp
-                        np.mean( etbb[1:,band-7,:,:], axis=0 ), # tbb
- #                       np.mean( eetot[1:,0,:,:], axis=0 )*0.001, # E sfc
-                        np.mean( eglm[1:,:,:], axis=0 ), # GLM
-          
- #                       np.transpose( np.mean( ez[1:,:,:,cx], axis=0 ) ), # YZ
- #                       np.mean( ez[1:,:,cy,:], axis=0 ), 
- #                       np.transpose( np.mean( evr[1:,:,:,cx], axis=0 ) ), # YZ
-#                        np.mean( evr[1:,:,cy,:], axis=0 ), 
-                        np.transpose( np.mean( efp[1:,:,:,cx], axis=0 ) ), # YZ
-                        np.mean( efp[1:,:,cy,:], axis=0 ), 
                         "",
                         "",
                         "",
@@ -339,21 +298,18 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
            ###
        
            tit_l = [ 
-                     "Radar (Ref)",
-#                     "Radar (V)",
-                     "BOLT (3D flash)", 
-                     r'IR (10.4$\mu$m)', 
- #                    "Surface Ez", 
-                     "GLM (2D flash)", 
+                     "GLM & {0:}".format( vname1 ), 
+                     "GLM & {0:}".format( vname2 ), 
+                     "GLM & {0:}".format( vname3 ), 
+                     "TBB & {0:}".format( vname1 ), 
+                     "TBB & {0:}".format( vname2 ), 
+                     "TBB & {0:}".format( vname3 ), 
                      "", "", "", "", "", "",
                      "", "", "", "", "", "",
                    ]
            unit_l = [ 
                       '(dBZ)', 
- #                     '(m/s)', 
-                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r'min)',
                       '(K)', 
- #                     '(kV/m)', # E
                       '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r'min)', # GLM
                       '(dBZ)', 
                       '(dBZ)', 
@@ -369,31 +325,15 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
            ymin_l = 120 + 10
            ymax_l = 320
        
-           xmin_s = xmin_l + 20
-           xmax_s = xmax_l - 40 
-           ymin_s = ymin_l + 20 
-           ymax_s = ymax_l - 40 
-       
-           xmin_s = 140
-           xmax_s = 250
-           ymin_s = 160
-           ymax_s = 250
-       
-           ymax_s = 260
-           xmax_s = 260
-           xmin_s = 120
-           ymin_s = 120
 
-           ymax_s = 270
-           xmax_s = 270
            xmin_s = 150
-           ymin_s = 150
+           ymin_s = 170
 
-           # debug
-           xmin_s + 20
-           xmax_s - 20
-           ymin_s + 20
-           ymax_s - 20
+           dx = 100
+           dy = dx * dv / dh
+    
+           xmax_s = xmin_s + dx
+           ymax_s = ymin_s + dy
 
            ctime = ( INFO["time0"] + timedelta(seconds=INFO["DT"] * tlev ) ).strftime('%H:%M:%S')
        
@@ -467,14 +407,11 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                  xaxis = INFO["Y"][jmin::nskip] * 0.001
                  xlabel = "Z (km)"
        
-       #          if ax is ax1_r:
-       #             ax.vlines( x=INFO["Z"][zlev]*0.001, ymin=ymin, ymax=ymax,
-       #                        colors="k",linestyles='dotted',linewidths=1.0 )
 
               elif crs_l[idx] is "XZ":
                  ymin = 0.0
                  ymax = 15.0
-                 ymax = 17.0
+                 #ymax = 17.0
                  xmin = xmin_s
                  xmax = xmax_s
        
@@ -497,7 +434,7 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                            markeredgewidth=1.0 )
        
                  # Plot radar site
-                 if ax is ax1 or ax is ax2:
+                 if ax is ax1:
                     ax.plot( 180.0, 180.0, marker='x', alpha=1.0,
                               ms=6, markerfacecolor="None", markeredgecolor='k',
                               markeredgewidth=1.0 )
@@ -537,11 +474,12 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                           markeredgewidth=1.0, zorder=1 )
        
        
-              if crs_l[idx] is not "YZ":
-                 ax.set_ylabel( ylabel, fontsize=6 )
+              if crs_l[idx] is "XZ":
+                 ax.set_ylabel( ylabel, fontsize=7 )
        
-              elif crs_l[idx] is not "XZ":
-                 ax.set_xlabel( xlabel, fontsize=6 )
+              if crs_l[idx] is not "XZ":
+                 ax.set_xlabel( xlabel, fontsize=7 )
+                 ax.set_ylabel( ylabel, fontsize=7 )
        
               x2d, y2d = np.meshgrid( yaxis, xaxis )
        
@@ -549,47 +487,43 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                      np.nanmax(VAR_l[idx]), np.nanmin(VAR_l[idx]) )
        
               # ensemble-mean z
-              if COR and ( crs_l[idx] is "XY_s" or \
-                 crs_l[idx] is "XZ" or \
-                 crs_l[idx] is "YZ" ):
+              if crs_l[idx] is "XY_s":
+                 cvar = cvar_mean[zlev_show,jmin::nskip,imin::nskip]
+              elif crs_l[idx] is "XZ":
+                 cvar = cvar_mean[:,cy,imin::nskip]
+              elif crs_l[idx] is "YZ":
+                 cvar = np.transpose( cvar_mean[:,jmin::nskip,cx] )
 
-                 if crs_l[idx] is "XY_s":
-                    cvar = cvar_mean[zlev_show,jmin::nskip,imin::nskip]
-                 elif crs_l[idx] is "XZ":
-                    cvar = cvar_mean[:,cy,imin::nskip]
-                 elif crs_l[idx] is "YZ":
-                    cvar = np.transpose( cvar_mean[:,jmin::nskip,cx] )
-                 CONT = ax.contour(x2d, y2d,
-                                   cvar, 
-                                   levels=np.arange(30,110,10),
-                                   linewidths=0.5,
-                                   linestyles="solid",
-                                   colors='k',
-                                   zorder=4,
-                                   ) 
-                 ax.clabel( CONT, CONT.levels, inline=True, inline_spacing=-5, fontsize=6, fmt='%2.0fdBZ',  )
 
-              if not COR and ax is ax6:
-                 SHADE = ax.pcolormesh(x2d, y2d,
-                                       VAR_l[idx][jmin::nskip,imin::nskip],
-                                       vmin=np.min(levs_fp),
-                                       vmax=np.max(levs_fp),
-                                       cmap=cmap_fp,) 
-              else:
+              CONT = ax.contour(x2d, y2d,
+                                cvar, 
+                                levels=np.arange(30,110,10),
+                                linewidths=0.5,
+                                linestyles="solid",
+                                colors='k',
+                                zorder=4,
+                                ) 
+              ax.clabel( CONT, CONT.levels, inline=True, inline_spacing=-5, 
+                  fontsize=6, fmt='%2.0fdBZ',  )
+
+#              if COR and ( crs_l[idx] is "XY_s" or \
+#                 crs_l[idx] is "XZ" or \
+#                 crs_l[idx] is "YZ" ):
+
        
-                 SHADE = ax.contourf(x2d, y2d,
-                                     VAR_l[idx][jmin::nskip,imin::nskip],
-                                     levels=levs_l[idx],
-                                     cmap=cmap_l[idx],
-                                     extend='both',
-                                     ) 
+              SHADE = ax.contourf(x2d, y2d,
+                                  VAR_l[idx][jmin::nskip,imin::nskip],
+                                  levels=levs_l[idx],
+                                  cmap=cmap_l[idx],
+                                  extend='both',
+                                  ) 
           
               ax.set_xlim( xmin, xmax )
               ax.set_ylim( ymin, ymax )
               ax.xaxis.set_ticks( np.arange(xmin, xmax, xdgrid) )
               ax.yaxis.set_ticks( np.arange(ymin, ymax, ydgrid) )
-              ax.tick_params(axis='both', which='minor', labelsize=5 )
-              ax.tick_params(axis='both', which='major', labelsize=5 )
+              ax.tick_params(axis='both', which='minor', labelsize=7 )
+              ax.tick_params(axis='both', which='major', labelsize=7 )
      
 
        
@@ -603,20 +537,16 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                  tskip = 2
        
        
-              if crs_l[idx] is not "XZ" and crs_l[idx] is not "YZ":
+              #if crs_l[idx] is not "XZ" and crs_l[idx] is not "YZ":
+              if ax is ax5:
                  pos = ax.get_position()
-                 cb_h = 0.01 #pos.height
-                 cb_w = pos.width * 1.0
-                 ax_cb = fig.add_axes( [pos.x0+0.0, pos.y0-0.055, cb_w, cb_h] )
-                 cb = plt.colorbar( SHADE, cax=ax_cb, orientation = 'horizontal', 
+                 cb_h = 0.02 # pos.height*1.5
+                 cb_w = pos.width * 2.5
+                 ax_cb = fig.add_axes( [ pos.x0-cb_w*0.5, pos.y0-0.05-cb_h, 
+                                         cb_w, cb_h] )
+                 cb = plt.colorbar( SHADE, cax=ax_cb, orientation='horizontal', 
                                     ticks=levs_l[idx][::tskip], extend='both' )
-                 cb.ax.tick_params( labelsize=5 )
-                 
-                 if not COR:
-                    ax.text( 1.0, -0.09, unit_l[idx],
-                             fontsize=6, transform=ax.transAxes,
-                             horizontalalignment='right',
-                             verticalalignment='top', )
+                 cb.ax.tick_params( labelsize=7 )
                  
           
               if crs_l[idx] is "XY":
@@ -639,15 +569,15 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                          bbox=bbox )
               
               if idx == 0:
-                 fig.text(0.99, 0.96, "t = {0:.0f} min\n(FT={1:.0f}min)".format( ft_sec/60, ft_sec_a/60.0 ),
-                         fontsize=11, #transform=ax.transAxes,
-                         horizontalalignment='right',
-                         verticalalignment='center')
+                 fig.text(0.95, 0.05, "t = {0:.0f} min\n(FT={1:.0f}min)".format( ft_sec/60, ft_sec_a/60.0 ),
+                         fontsize=10,
+                         ha='right', va='bottom',
+                         )
        
        #       if idx == 2:
        #          ax.set_xticks(np.arange(0,300,2), minor=False)
        
-           fig.suptitle( fig_tit, fontsize=18 )
+           fig.suptitle( fig_tit, fontsize=12 )
        
        
            print( ofig )
@@ -667,10 +597,6 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
 
 DX = 2000.0
 DY = 2000.0
-XDIM = 192
-YDIM = 192
-TDIM = 13
-ZDIM = 40
 
 XDIM = 176
 YDIM = 176
@@ -687,9 +613,6 @@ BAND = np.arange( 7, 17, 1 )
 
 Z = np.arange(DZ*0.5, DZ*ZDIM, DZ)
 
-
-EXP = "2000m_DA_0306"
-EXP = "2000m_DA_0601"
 
 EXP = "2000m_DA_0723"
 
@@ -800,12 +723,16 @@ cy_l =  [ 101, ]
 
 #vname_l = [ "T" ]
 
+vname1 = "W"
+vname2 = "V"
+vname3 = "T"
+
 mmem = 1
 #mmem = 32
 
 fp_acum = 2
 fp_acum = 6
-fp_acum = 1 # DEBUG
+#fp_acum = 1 # DEBUG
 
 if fp_acum > tmin:
    fp_acum = tmin
@@ -819,11 +746,12 @@ zlev_tgte = zlev_tgts+1
 for zlev_tgt in range(zlev_tgts, zlev_tgte, 1):
    zlev_show = zlev_tgt
 
-   for vname in vname_l:
-       for tlev in range( tmin, tmax ):
-           main( INFO, tlev=tlev, vname=vname, cx_l=cx_l, cy_l=cy_l, COR=COR, member=320, zlev_show=zlev_show, zlev_tgt=zlev_tgt, mmem=mmem, fp_acum=fp_acum )
-   
-       if not COR:
-          sys.exit()
+   for tlev in range( tmin, tmax ):
+       main( INFO, tlev=tlev, vname1=vname1,
+             vname2=vname2, vname3=vname3,
+             cx_l=cx_l, cy_l=cy_l, COR=COR, member=320, zlev_show=zlev_show, zlev_tgt=zlev_tgt, mmem=mmem, fp_acum=fp_acum )
+
+   if not COR:
+      sys.exit()
 
 #   sys.exit()

@@ -81,15 +81,26 @@ def read_ecor( INFO, stime=datetime(2001,1,1,1,0), nvar_l=["tbb"], nvar_ref="QG"
 
     return( ECOR, AECOR, CNT )
 
-def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_acum=1 ):
-
-
-
-    ECOR, AECOR, CNT = read_ecor( INFO, stime=INFO["time0"], nvar_l=nvar_l, nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum )
-
+def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_acum=1, 
+               vname_l=["QG", "W", "T"] ):
+    
+    tvar_l = []
+    info_l = []
     ecor_l = []
-    for nvar in nvar_l:
-        ecor_l.append( ECOR[nvar]/ CNT[nvar])
+    for i, vname in enumerate( vname_l ):
+        ECOR, AECOR, CNT = read_ecor( INFO, stime=INFO["time0"], nvar_l=nvar_l, nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum )
+
+        ecor_l.append( ECOR["tbb"]/ CNT["tbb"])
+        info_l.append( "tbb" )
+        tvar_l.append( vname )
+
+    for i, vname in enumerate( vname_l ):
+        ECOR, AECOR, CNT = read_ecor( INFO, stime=INFO["time0"], nvar_l=nvar_l, nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum )
+        ecor_l.append( ECOR["glm"]/ CNT["glm"])
+        info_l.append( "glm" )
+        tvar_l.append( vname )
+    print( info_l )
+
         #ecor_l.append( AECOR[nvar]/ CNT[nvar])
 
     cmap_rb = plt.cm.get_cmap("RdBu_r")
@@ -107,17 +118,56 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
     xlabel = "Horizontal distance (km)"
     ylabel = "Height (km)"
 
-    fig, ((ax1, ax2, ax3)) = plt.subplots(1, 3, figsize=( 9, 5))
-    fig.subplots_adjust(left=0.08, bottom=0.1, right=0.92, top=0.92,
-                        wspace=0.4, hspace=0.2)
+
+    dv = 8
+    dv2 = 2  
+    dh = 6      
+    dh2 = 2  
+
+    v_tot = dv + dv2 + dv
+    h_tot = dh*4 + dh2*3 
+
+    hsize = 11.0
+    vsize = hsize * v_tot / h_tot
+    fig = plt.figure( figsize=(hsize, vsize) )
+
+    gs = gridspec.GridSpec( 3, 7, 
+                            height_ratios=( dv, dv2, dv ), 
+                            width_ratios=( dh, dh2, dh, dh2, dh, dh2, dh ) )
+    axs = [ 
+             plt.subplot(gs[0, 0]), 
+             plt.subplot(gs[0, 2]), 
+             plt.subplot(gs[0, 4]), 
+             plt.subplot(gs[0, 6]), 
+
+             plt.subplot(gs[2, 0]), 
+             plt.subplot(gs[2, 2]), 
+             plt.subplot(gs[2, 4]), 
+             plt.subplot(gs[2, 6]), 
+            ]
+
+    ax1 = axs[0]
+    ax2 = axs[1]
+    ax3 = axs[2]
+    ax4 = axs[3]
+    ax5 = axs[4]
+    ax6 = axs[5]
+    ax7 = axs[6]
+    ax8 = axs[7]
+
+    ax_l = [ ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8 ]
+
+    fig.subplots_adjust(left=0.05, bottom=0.08, right=0.92, top=0.95,
+                        wspace=0.0, hspace=0.0)
+
+#    fig, (( ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = plt.subplots( 2, 4, figsize=( 10, 6))
+##                        wspace=0.3, hspace=0.4)
  
-    pnum_l = [ "(a)", "(b)", "(c)" ]
-    ax_l = [ ax1, ax2, ax3 ]
+    pnum_l = [ "(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)", "(h)" ]
+#    ax_l = [ ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8 ]
     bbox = { 'facecolor':'w', 'alpha':0.95, 'pad':1.5, 'edgecolor':'w' }
 
-    for n, var3d in enumerate(nvar_l):
-
-        ax = ax_l[n]
+    for n, ax in enumerate( ax_l ):
  
         rz2d, r1d = calc_rz_crs( var3d=ecor_l[n] )
 
@@ -135,52 +185,57 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
         ax.clabel( CONT, CONT.levels, inline=True, inline_spacing=0, 
                    fontsize=8, fmt='%3.1f', colors="k" )
 
+        ax.tick_params(axis='both', which='minor', labelsize=8 )
+        ax.tick_params(axis='both', which='major', labelsize=8 )
+
+        ymin = 0.0
+        ymax = 17.0
+        ax.set_ylim( ymin, ymax )
 
         zlev_tgt_ = zlev_tgt
-        if var3d != "tbb" and var3d != "glm" and var3d != "esfc":
-           ax.plot( 0.0, INFO["Z"][zlev_tgt]*0.001, 
-                    linewidth=3.0,
-                    marker='s', markersize=15, color='k' )
-        else:
-           zlev_tgt_ = -1
+#        if var3d != "tbb" and var3d != "glm" and var3d != "esfc":
+#           ax.plot( 0.0, INFO["Z"][zlev_tgt]*0.001, 
+#                    linewidth=3.0,
+#                    marker='s', markersize=15, color='k' )
+#        else:
+#           zlev_tgt_ = -1
 
-        ax.set_xlabel( xlabel, fontsize=10 )
-        ax.set_ylabel( ylabel, fontsize=10 )
+        ax.set_xlabel( xlabel, fontsize=9 )
+        ax.set_ylabel( ylabel, fontsize=9 )
 
         ax.text( 0.08, 0.95, pnum_l[n],
+                 fontsize=9, transform=ax.transAxes,
+                 horizontalalignment='center',
+                 verticalalignment='top', 
+                 bbox=bbox )
+
+        if info_l[n] == "esfc":
+           var3d_ = "Surface Ez"
+        elif info_l[n] == "tbb":
+           var3d_ = r'IR (10.4$\mu$m)'
+        else:
+           var3d_ = str.upper( info_l[n] )
+        ax.text( 0.5, 0.95, '{:1} & {:2}'.format( var3d_, tvar_l[n] ),
                  fontsize=10, transform=ax.transAxes,
                  horizontalalignment='center',
                  verticalalignment='top', 
                  bbox=bbox )
 
-        if var3d == "esfc":
-           var3d_ = "Surface Ez"
-        elif var3d == "tbb":
-           var3d_ = r'IR (10.4$\mu$m)'
-        else:
-           var3d_ = str.upper(var3d)
-        #ax.text( 0.5, 0.95, '{:1} vs {:2}'.format(str.upper(var3d), vname),
-        ax.text( 0.5, 0.95, '{:1} & {:2}'.format( var3d_, vname),
-                 fontsize=11, transform=ax.transAxes,
-                 horizontalalignment='center',
-                 verticalalignment='top', 
-                 bbox=bbox )
 
-        print(n, var3d, vname)
-
-    pos = ax3.get_position()
-    cb_h = pos.height #0.01 #pos.height
+    pos = ax8.get_position()
+    cb_h = pos.height*1.5 #0.01 #pos.height
     cb_w = 0.01
-    ax_cb = fig.add_axes( [pos.x1+0.01, pos.y0, cb_w, cb_h] )
+    ax_cb = fig.add_axes( [pos.x1+0.01, pos.y0+pos.height*0.5, 
+                  cb_w, cb_h] )
 
     cb = plt.colorbar( SHADE, cax=ax_cb, orientation = 'vertical', 
                        ticks=levs, extend='both' )
     cb.ax.tick_params( labelsize=8 )
 
-    fig.suptitle( "Averaged ensemble-based correlations", fontsize=16)
+    fig.suptitle( "Averaged ensemble-based correlations", fontsize=12 )
 
-    odir = "png/3p_ave_cor_" + INFO["EXP"]
-    ofig = '3p_{:}_{:}_z{:0=2}_{:}_lm{:0=3}_ac{:0=2}'.format( var3d, vname, zlev_tgt_, INFO["EXP"], mem_min, fp_acum )
+    odir = "png/8p_ave_cor_" + INFO["EXP"]
+    ofig = '8p_{:}_{:}_z{:0=2}_{:}_lm{:0=3}_ac{:0=2}'.format( info_l[n], vname, zlev_tgt_, INFO["EXP"], mem_min, fp_acum )
 
     print( ofig, odir )
  
@@ -293,7 +348,11 @@ tmax = tmin + 1
 nvar_l = ["tbb", "glm", "esfc"]
 #nvar_l = ["vr", "glm", "z"]
 
-for vname in vname_l:
-    for tlev in range( tmin, tmax ):
-        plot_ecor( INFO, nvar_l=nvar_l, tlev=tlev, vname=vname, member=320, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum )
+nvar_l = ["tbb", "glm", ]
+
+vname_l=["QHYD", "W", "V", "T"]
+
+for tlev in range( tmin, tmax ):
+    plot_ecor( INFO, nvar_l=nvar_l, tlev=tlev, vname=vname, member=320, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum, 
+       vname_l=vname_l )
 
