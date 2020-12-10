@@ -13,7 +13,7 @@ import matplotlib.patches as patches
 
 
 quick = True
-#quick = False
+quick = False
 
 def calc_rz_crs( var3d=np.array([]) ):
 

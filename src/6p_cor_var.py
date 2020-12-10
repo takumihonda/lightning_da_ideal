@@ -14,7 +14,7 @@ import matplotlib.patches as patches
 from tools_LT import read_evar4d_nc, read_evars, get_ecor, get_eGLM
 
 quick = True
-#quick = False
+quick = False
 
 
 def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True, zlev_show=10, zlev_tgt=10, mmem=0, fp_acum=1, 
