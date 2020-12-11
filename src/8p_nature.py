@@ -179,7 +179,8 @@ def main( INFO, tlev=0, acm_fp=1 ):
 
     tit_l = [ 
               "Radar",
-              fp_note + "BOLT (3D flash)", 
+              #fp_note + "BOLT (3D flash)", 
+              fp_note + "3D flash", 
               r'IR (10.4$\mu$m)', 
 #              "Surface Ez", 
               fp_note + "GLM (2D flash)", 

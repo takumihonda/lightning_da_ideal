@@ -265,7 +265,7 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                          levs_rb, levs_rb, levs_rb, levs_rb, levs_rb, levs_rb, 
                          levs_rb, levs_rb, levs_rb, levs_rb, levs_rb, levs_rb, ]
        
-              fig_tit =  "Ensemble-based correlations with " + vname 
+              fig_tit =  "Ensemble-based correlations" 
        
               ofig =  "6p_acm_var_{0:}_{1:}_{2:}_{3:}_obs_init{4:}_t{5:}_ft{6:}_x{7:}_y{8:}_zs{9:}_zt{10:}_mmem{11:}_fpacum{10:}".format( INFO["EXP"], vname1, vname2, INFO["time0"].strftime('%H%M'), \
                        str( ft_sec ).zfill(5), str( ft_sec_a ).zfill(5),  str(cx).zfill(3), str(cy).zfill(3),  str(zlev_show).zfill(2), str(zlev_tgt).zfill(2), str( mmem_ ).zfill(4), str(fp_acum).zfill(2) )
@@ -301,9 +301,9 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                      "GLM & {0:}".format( vname1 ), 
                      "GLM & {0:}".format( vname2 ), 
                      "GLM & {0:}".format( vname3 ), 
-                     "TBB & {0:}".format( vname1 ), 
-                     "TBB & {0:}".format( vname2 ), 
-                     "TBB & {0:}".format( vname3 ), 
+                     r'IR (10.4$\mu$m) & {0:}'.format( vname1 ), 
+                     r'IR (10.4$\mu$m) & {0:}'.format( vname2 ), 
+                     r'IR (10.4$\mu$m) & {0:}'.format( vname3 ), 
                      "", "", "", "", "", "",
                      "", "", "", "", "", "",
                    ]
@@ -724,7 +724,7 @@ cy_l =  [ 101, ]
 #vname_l = [ "T" ]
 
 vname1 = "W"
-vname2 = "V"
+vname2 = "QV"
 vname3 = "T"
 
 mmem = 1

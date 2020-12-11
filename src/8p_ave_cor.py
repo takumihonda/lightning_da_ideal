@@ -90,14 +90,14 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
     for i, vname in enumerate( vname_l ):
         ECOR, AECOR, CNT = read_ecor( INFO, stime=INFO["time0"], nvar_l=nvar_l, nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum )
 
-        ecor_l.append( ECOR["tbb"]/ CNT["tbb"])
-        info_l.append( "tbb" )
+        ecor_l.append( ECOR["glm"]/ CNT["glm"])
+        info_l.append( "glm" )
         tvar_l.append( vname )
 
     for i, vname in enumerate( vname_l ):
         ECOR, AECOR, CNT = read_ecor( INFO, stime=INFO["time0"], nvar_l=nvar_l, nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum )
-        ecor_l.append( ECOR["glm"]/ CNT["glm"])
-        info_l.append( "glm" )
+        ecor_l.append( ECOR["tbb"]/ CNT["tbb"])
+        info_l.append( "tbb" )
         tvar_l.append( vname )
     print( info_l )
 
@@ -348,9 +348,9 @@ tmax = tmin + 1
 nvar_l = ["tbb", "glm", "esfc"]
 #nvar_l = ["vr", "glm", "z"]
 
-nvar_l = ["tbb", "glm", ]
+nvar_l = ["glm", "tbb", ]
 
-vname_l=["QHYD", "W", "V", "T"]
+vname_l=["QHYD", "W", "QV", "T"]
 
 for tlev in range( tmin, tmax ):
     plot_ecor( INFO, nvar_l=nvar_l, tlev=tlev, vname=vname, member=320, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum, 
