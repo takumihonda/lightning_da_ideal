@@ -14,7 +14,7 @@ import matplotlib.patches as patches
 from tools_LT import read_evar4d_nc, read_evars, get_ecor, get_eGLM
 
 quick = True
-quick = False
+#quick = False
 
 
 def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True, zlev_show=10, zlev_tgt=10, mmem=0, fp_acum=1 ):
@@ -551,7 +551,7 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                          bbox=bbox )
               
               if idx == 0:
-                 fig.text(0.95, 0.05, "t = {0:.0f} min\n(FT={1:.0f}min)".format( ft_sec/60, ft_sec_a/60.0 ),
+                 fig.text(0.95, 0.05, "t = {0:.0f} min\n(FT={1:.0f} min)".format( ft_sec/60, ft_sec_a/60.0 ),
                          fontsize=10,
                          ha='right', va='bottom',
                          )

@@ -127,7 +127,6 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
               0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7,]
 
     levs = np.arange( -0.7, 0.75, 0.05 )
-
 #    levs = levs_c
 
     z1d = INFO["Z"]
@@ -144,23 +143,25 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
     v_tot = dv + dv2 + dv
     h_tot = dh*4 + dh2*3 
 
-    hsize = 11.0
+    hsize = 13.0
     vsize = hsize * v_tot / h_tot
     fig = plt.figure( figsize=(hsize, vsize) )
 
-    gs = gridspec.GridSpec( 3, 7, 
+    gs = gridspec.GridSpec( 3, 9, 
                             height_ratios=( dv, dv2, dv ), 
-                            width_ratios=( dh, dh2, dh, dh2, dh, dh2, dh ) )
+                            width_ratios=( dh, dh2, dh, dh2, dh, dh2, dh, dh2, dh ) )
     axs = [ 
              plt.subplot(gs[0, 0]), 
              plt.subplot(gs[0, 2]), 
              plt.subplot(gs[0, 4]), 
              plt.subplot(gs[0, 6]), 
+             plt.subplot(gs[0, 8]), 
 
              plt.subplot(gs[2, 0]), 
              plt.subplot(gs[2, 2]), 
              plt.subplot(gs[2, 4]), 
              plt.subplot(gs[2, 6]), 
+             plt.subplot(gs[2, 8]), 
             ]
 
     ax1 = axs[0]
@@ -171,8 +172,10 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
     ax6 = axs[5]
     ax7 = axs[6]
     ax8 = axs[7]
+    ax9 = axs[8]
+    ax10 = axs[9]
 
-    ax_l = [ ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8 ]
+    ax_l = [ ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9, ax10 ]
 
     fig.subplots_adjust(left=0.05, bottom=0.08, right=0.92, top=0.95,
                         wspace=0.0, hspace=0.0)
@@ -180,7 +183,7 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
 #    fig, (( ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = plt.subplots( 2, 4, figsize=( 10, 6))
 ##                        wspace=0.3, hspace=0.4)
  
-    pnum_l = [ "(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)", "(h)" ]
+    pnum_l = [ "(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)", "(h)", "(i)", "(j)" ]
 #    ax_l = [ ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8 ]
     bbox = { 'facecolor':'w', 'alpha':0.95, 'pad':1.5, 'edgecolor':'w' }
 
@@ -239,7 +242,7 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
                  bbox=bbox )
 
 
-    pos = ax8.get_position()
+    pos = ax10.get_position()
     cb_h = pos.height*1.5 #0.01 #pos.height
     cb_w = 0.01
     ax_cb = fig.add_axes( [pos.x1+0.01, pos.y0+pos.height*0.5, 
@@ -254,7 +257,7 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
        tit = r'Averaged ensemble-based correlations (where column maximum q$_h$ > {0:.1f} g kg$^{{-1}}$)'.format( qhyd_min*1.e3 )
     fig.suptitle( tit, fontsize=12 )
 
-    odir = "pdf/fig20210624/8p_ave_cor_" + INFO["EXP"]
+    odir = "png/fig20210624/10p_ave_cor_" + INFO["EXP"]
     odir = "pdf/fig20210624/"
 
     if CLD:
@@ -263,7 +266,7 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
        cld_ = ""
  
 
-    ofig = '8p_{0:}_{1:}_z{2:0=2}_{3:}_lm{4:0=3}_ac{5:0=2}_B{6:0=2}{7:}.pdf'.format( info_l[n], vname, zlev_tgt_, INFO["EXP"], mem_min, fp_acum, band, cld_ )
+    ofig = '10p_{0:}_{1:}_z{2:0=2}_{3:}_lm{4:0=3}_ac{5:0=2}_B{6:0=2}{7:}_add.pdf'.format( info_l[n], vname, zlev_tgt_, INFO["EXP"], mem_min, fp_acum, band, cld_ )
 
     print( ofig, odir )
  
@@ -380,6 +383,8 @@ nvar_l = ["glm", "tbb", ]
 
 vname_l=["QHYD", "W", "QV", "T"]
 #vname_l=["QHYD", "QS", "QV", "T"]
+
+vname_l=["QG", "QS", "QI", "QR", "QC"]
 
 band = 13
 band = 9

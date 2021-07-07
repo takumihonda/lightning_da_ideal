@@ -72,7 +72,7 @@ def read_ecor( INFO, stime=datetime(2001,1,1,1,0), nvar_l=["tbb"], nvar_ref="QG"
 
     return( ECOR, AECOR, CNT )
 
-def store_ecor( INFO, ecor, aecor, num=1, stime=datetime(2001,1,1,1,0), nvar="tbb", nvar_ref="QG", tlev=0, zlev_tgt=-1, mem_min=1, fp_acum=1 ):
+def store_ecor( INFO, ecor, aecor, num=1, stime=datetime(2001,1,1,1,0), nvar="tbb", nvar_ref="QG", tlev=0, zlev_tgt=-1, mem_min=1, fp_acum=1, band=13, CLD=False, qhyd_min=0.001 ):
 
     if nvar == "tbb" or nvar == "glm" or nvar == "esfc":
        tzlev_tgt = -1
@@ -84,8 +84,18 @@ def store_ecor( INFO, ecor, aecor, num=1, stime=datetime(2001,1,1,1,0), nvar="tb
     else:
        mem_min_ = "_mem" + str(mem_min).zfill(3)
 
+    if nvar == "tbb":
+       band_ = "_B" + str( band ).zfill(2)
+    else:
+       band_ = ""
+
+    if CLD:
+       cld_ = "_cld_qmin{0:.4f}".format( qhyd_min )
+    else:
+       cld_ = ""
+
     ctime = stime.strftime('%Y%m%d%H%M%S')
-    ofn = os.path.join( INFO["GTOP"], INFO["EXP"], ctime, "fcst", "ecor_" + nvar + "_" + nvar_ref + "_t" + str(INFO["DT"] * tlev).zfill(5) + "_z" + str(tzlev_tgt).zfill(3) + mem_min_ + "_ac" + str( fp_acum ).zfill(2) + ".npz")
+    ofn = os.path.join( INFO["GTOP"], INFO["EXP"], ctime, "fcst", "20210624ecor_" + nvar + "_" + nvar_ref + "_t" + str(INFO["DT"] * tlev).zfill(5) + "_z" + str(tzlev_tgt).zfill(3) + mem_min_ + "_ac" + str( fp_acum ).zfill(2) + band_ + cld_ + ".npz")
 
     print( ofn )
     np.savez( ofn, ecor=ecor, aecor=aecor, num=num )
@@ -183,14 +193,22 @@ def plot_ecor( INFO, tlev=0, vname="QG", member=80, zlev_tgt=10 ):
 
 
 
-def calc_ecor( INFO, tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_acum=1):
-    # read obs variables & ens variables
-    etbb, ez, evr, efp, eetot, evar = read_evars( INFO, tlev=tlev, vname=vname, member=member )
+def calc_ecor( INFO, tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_acum=1, band=13, CLD=False, qhyd_min=0.001 ):
 
-    print( "CHK0",etbb.shape, ez.shape, evr.shape, eetot.shape, evar.shape )
+    if CLD:
+       eqhyd2d = np.max( read_evar4d_nc( INFO, vname="QHYD", tlev=tlev, typ="fcst", stime=INFO["time0"] ), axis=1 )
+       mqhyd2d = np.mean( eqhyd2d, axis=0 )
+       print( eqhyd2d.shape, mqhyd2d.shape )
+
+
+    # read obs variables & ens variables
+    etbb, ez, efp, evar = read_evars( INFO, tlev=tlev, vname=vname, member=member )
+
+    print( "CHK0",etbb.shape, ez.shape, evar.shape )
+    _, _, nymax, nxmax = evar.shape
 
     for dt_ in range( 1, fp_acum ):
-       _, _, _, efp_, _, _ = read_evars( INFO, tlev=tlev-dt_, vname=vname, member=member )
+       _, _, _, efp_ = read_evars( INFO, tlev=tlev-dt_, vname=vname, member=member )
        efp += efp_
 
 
@@ -201,7 +219,6 @@ def calc_ecor( INFO, tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_a
 #    ew = read_evar4d_nc( INFO, vname="W", tlev=tlev, typ="fcst", stime=INFO["time0"] )
 
 
-    band = 13
 
     cvar_mean = np.mean( ez[1:,:,:,:], axis=0 )
        
@@ -218,7 +235,12 @@ def calc_ecor( INFO, tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_a
     print( eglm.shape, efp.shape )
     eglm_cnt = np.where( eglm > 0.0, 1, 0.0) # 1: on, 0: off
     eglm_cnt2d =  np.sum(eglm_cnt[1:,:,:], axis=0 ) 
-    idx1, idx2 =  np.where(eglm_cnt2d[:,:] > mem_min )
+
+    if CLD:
+       idx1, idx2 =  np.where( ( eglm_cnt2d[:,:] > mem_min ) & 
+                                 ( mqhyd2d[:,:] > qhyd_min ) )
+    else:
+       idx1, idx2 =  np.where(eglm_cnt2d[:,:] > mem_min )
 
     jidxs = idx1[(idx1%ng==0) & (idx2%ng==0)]
     iidxs = idx2[(idx1%ng==0) & (idx2%ng==0)]
@@ -258,8 +280,12 @@ def calc_ecor( INFO, tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_a
 #        print(n, cy)
         cx = iidxs[n]
         print(cx,cy,n)
+        if cx <= cnx or cy <= cny or cx >= ( nxmax - cnx ) or cy >= ( nymax - cny ):
+           print( "skip")
+           continue
 
         evar_ref = evar[:,:,cy-cny:cy+cny+1,cx-cnx:cx+cnx+1]
+        print( evar_ref.shape )
  
         var1d_tbb = etbb[:,band-7,cy,cx]
         ecor_tbb += get_ecor( var1d_tbb, evar_ref )
@@ -269,9 +295,9 @@ def calc_ecor( INFO, tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_a
         ecor_z += get_ecor( var1d_z, evar_ref )
         aecor_z += np.abs( get_ecor( var1d_z, evar_ref ) )
 
-        var1d_vr = evr[:,zlev_tgt,cy,cx]
-        ecor_vr += get_ecor( var1d_vr, evar_ref )
-        aecor_vr += np.abs( get_ecor( var1d_vr, evar_ref ) )
+#        var1d_vr = evr[:,zlev_tgt,cy,cx]
+#        ecor_vr += get_ecor( var1d_vr, evar_ref )
+#        aecor_vr += np.abs( get_ecor( var1d_vr, evar_ref ) )
 
         var1d_glm = eglm[:,cy,cx]
         ecor_glm += get_ecor( var1d_glm, evar_ref )
@@ -281,9 +307,9 @@ def calc_ecor( INFO, tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_a
         ecor_fp += get_ecor( var1d_fp, evar_ref )
         aecor_fp += np.abs( get_ecor( var1d_fp, evar_ref ) )
 
-        var1d_esfc = np.abs( eetot[:,0,cy,cx] )
-        ecor_esfc += get_ecor( var1d_esfc, evar_ref )
-        aecor_esfc += np.abs( get_ecor( var1d_esfc, evar_ref ) )
+#        var1d_esfc = np.abs( eetot[:,0,cy,cx] )
+#        ecor_esfc += get_ecor( var1d_esfc, evar_ref )
+#        aecor_esfc += np.abs( get_ecor( var1d_esfc, evar_ref ) )
 
 
 #    ecor_tbb = ecor_tbb / len(iidxs)
@@ -293,17 +319,22 @@ def calc_ecor( INFO, tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_a
 #    ecor_fp = ecor_fp / len(iidxs)
 #    ecor_esfc = ecor_esfc / len(iidxs)
 
-    ecor_l = [ ecor_tbb, ecor_z, ecor_vr, ecor_glm, ecor_fp, ecor_esfc]
-    aecor_l = [ aecor_tbb, aecor_z, aecor_vr, aecor_glm, aecor_fp, aecor_esfc]
-    nvar_l = [ "tbb", "z", "vr", "glm", "fp", "esfc" ]
+#    ecor_l = [ ecor_tbb, ecor_z, ecor_vr, ecor_glm, ecor_fp, ecor_esfc]
+#    aecor_l = [ aecor_tbb, aecor_z, aecor_vr, aecor_glm, aecor_fp, aecor_esfc]
+#    nvar_l = [ "tbb", "z", "vr", "glm", "fp", "esfc" ]
+
+    ecor_l = [ ecor_tbb, ecor_z, ecor_glm, ecor_fp, ]
+    aecor_l = [ aecor_tbb, aecor_z, aecor_glm, aecor_fp,]
+    nvar_l = [ "tbb", "z", "glm", "fp", ]
+
+    ecor_l = [ ecor_tbb, ecor_z, ecor_glm, ecor_fp, ]
+    aecor_l = [ aecor_tbb,  aecor_z, aecor_glm, aecor_fp,]
+    nvar_l = [ "tbb",  "z", "glm", "fp", ]
+
     for n, ecor in enumerate(ecor_l):
 
-        store_ecor( INFO, ecor_l[n], aecor_l[n], num=len(iidxs), stime=INFO["time0"], nvar=nvar_l[n], nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum )
-#    store_ecor( INFO, ecor_z, stime=INFO["time0"], nvar="z", nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt )
-#    store_ecor( INFO, ecor_vr, stime=INFO["time0"], nvar="vr", nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt )
-#    store_ecor( INFO, ecor_fp, stime=INFO["time0"], nvar="fp", nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt )
-#    store_ecor( INFO, ecor_glm, stime=INFO["time0"], nvar="glm", nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt )
-#    store_ecor( INFO, ecor_esfc, stime=INFO["time0"], nvar="esfc", nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt)
+        store_ecor( INFO, ecor_l[n], aecor_l[n], num=len(iidxs), stime=INFO["time0"], nvar=nvar_l[n], nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum, band=band,
+                    CLD=CLD )
 
 
        
@@ -366,9 +397,11 @@ vname_l = [ "QCRG", "QG", "QS", "QC", "QR", "QI", "QV", "CR", "CI", "CC",
 
 
 
-vname_l = [ "QHYD", ]
-#vname_l = [ "QG", "CG"]
+vname_l = [ "W", "QV", "T", "QHYD"]
+vname_l = [ "QG", "QS", "QR", "QI", "QC"]
 
+vname_l = [ "W", "QV", "T", "QHYD", "QG", "QS", "QR", "QI", "QC" ]
+vname_l = [ "QHYD", ]
 
 zlev_tgt = 13
 zlev_tgt = 16
@@ -386,16 +419,25 @@ mem_min = 32
 #mem_min = 128
 #mem_min = 1
 
+band = 9
+#band = 8
+#band = 10
+#band = 13
+
+CLD = True
+qhyd_min = 0.001
+qhyd_min = 0.0001
+
 tmin = 6
 tmax = tmin + 1
 fp_acum = 6
-fp_acum = 1
+#fp_acum = 1
 
 if fp_acum > tmin:
    fp_acum = tmin
 
 for vname in vname_l:
     for tlev in range( tmin, tmax, fp_acum ):
-        calc_ecor( INFO, tlev=tlev, vname=vname, member=320, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum )
+        calc_ecor( INFO, tlev=tlev, vname=vname, member=320, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum, band=band, CLD=CLD, qhyd_min=qhyd_min )
         #plot_ecor( INFO, tlev=tlev, vname=vname, member=320, zlev_tgt=zlev_tgt )
 

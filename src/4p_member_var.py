@@ -15,7 +15,7 @@ import matplotlib.colors as mpc
 from tools_LT import read_evar_only 
 
 quick = True
-#quick = False
+quick = False
 
 def main( INFO, tlev=0, vname="QG", member=80, zlev_show=10, zlev_tgt=10, mem=0, ftit=None ):
 
@@ -549,7 +549,7 @@ def main( INFO, tlev=0, vname="QG", member=80, zlev_show=10, zlev_tgt=10, mem=0,
            ax4.set_ylabel("Height (km)")
            ax4.set_xlabel("# of flashes")
        
-           ax4.text( 0.5, 0.95, "Flash count\n(FT=60-120min)",
+           ax4.text( 0.5, 0.95, "Flash count\n(FT=60-120 min)",
                      fontsize=10, transform=ax4.transAxes,
                      horizontalalignment='center',
                      verticalalignment='top', )
@@ -629,8 +629,9 @@ INFO = {"XDIM":XDIM, "YDIM":YDIM, "NBAND":10, "TDIM":TDIM,
 tmin = 1
 #tmin = 2
 #tmin = 3
-#tmax = tmin + 1
-tmax = 13
+tmin = 6
+tmax = tmin + 1
+#tmax = 13
 vname = "QG"
 #vname = "CS"
 vname = "QS"

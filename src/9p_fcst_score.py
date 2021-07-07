@@ -243,9 +243,9 @@ def main( INFO, EXP1="2000m_DA_0306", EXP2="2000m_DA_0306", NEXP="2000m_NODA_030
 
 
     if typ is not "fcst":
-       info = 't={0:.0f}min\nZ={1:}km'.format( ft_sec_a/60.0, INFO["Z"][zlev_show]/1000)
+       info = 't={0:.0f}min\nZ={1:} km'.format( ft_sec_a/60.0, INFO["Z"][zlev_show]/1000)
     else:
-       info = 't={0:.0f}min\n(FT={1:.0f}min)\nZ={2:}km'.format( ft_sec_a/60, ft_sec/60, INFO["Z"][zlev_show]/1000)
+       info = 't={0:.0f}min\n(FT={1:.0f} min)\nZ={2:} km'.format( ft_sec_a/60, ft_sec/60, INFO["Z"][zlev_show]/1000)
     
 
     VAR_l = [ 
@@ -729,22 +729,22 @@ EXP2 = "2000m_DA_0723_FP_30min_LOC10km_VLOCW20"
 EXP2 = "2000m_DA_0723_FP_30min_LOC10km_VLOC30km"
 EXP2 = "2000m_DA_0723_FP_30min_LOC30km"
 
-EXP2 = "2000m_DA_0723_FP_30min_LOC30km_X183km_Y199km"
-
-EXP2 = "2000m_DA_0723_Z20km_FP_30min_LOC30km"
-
-EXP2 = "2000m_DA_0723_FP_30min_LOC30km_COERR0.2"
-EXP2 = "2000m_DA_0723_FP_30min_LOC20km"
-
-EXP2 = "2000m_DA_0723_FP_30min_LOC20km_X159km_Y231km"
-
-EXP2 = "2000m_DA_0723_FP_30min_LOC30km_COERR0.2"
-
-EXP2 = "2000m_DA_0723_FP_30min_LOC20km_M240"
-
-EXP2 = "2000m_DA_0723_FP_30min_LOC20km_M240_NOG"
-
-EXP2 = "2000m_DA_0723_FP_30min_LOC20km_M240_NOCLROBS"
+#EXP2 = "2000m_DA_0723_FP_30min_LOC30km_X183km_Y199km"
+#
+#EXP2 = "2000m_DA_0723_Z20km_FP_30min_LOC30km"
+#
+#EXP2 = "2000m_DA_0723_FP_30min_LOC30km_COERR0.2"
+#EXP2 = "2000m_DA_0723_FP_30min_LOC20km"
+#
+#EXP2 = "2000m_DA_0723_FP_30min_LOC20km_X159km_Y231km"
+#
+#EXP2 = "2000m_DA_0723_FP_30min_LOC30km_COERR0.2"
+#
+#EXP2 = "2000m_DA_0723_FP_30min_LOC20km_M240"
+#
+#EXP2 = "2000m_DA_0723_FP_30min_LOC20km_M240_NOG"
+#
+#EXP2 = "2000m_DA_0723_FP_30min_LOC20km_M240_NOCLROBS"
 NEXP = "2000m_NODA_0723"
 
 

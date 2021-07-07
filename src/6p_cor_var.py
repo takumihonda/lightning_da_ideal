@@ -11,14 +11,14 @@ from matplotlib import gridspec
 import matplotlib.colors as mcolors
 import matplotlib.patches as patches
 
-from tools_LT import read_evar4d_nc, read_evars, get_ecor, get_eGLM
+from tools_LT import read_evar4d_nc, read_evars, get_ecor, get_eGLM, band2wavelength
 
 quick = True
-quick = False
+#quick = False
 
 
 def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True, zlev_show=10, zlev_tgt=10, mmem=0, fp_acum=1, 
-          vname1="QG", vname2="QS", vname3="T" ):
+          vname1="QG", vname2="QS", vname3="T", band=13 ):
 
 
     cx = cx_l[0]
@@ -59,7 +59,6 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
     print("")
 
 
-    band = 13
 
     pnum_l = [ "(a)", 
                "(b)",
@@ -224,7 +223,9 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
            ecor_glm2 = get_ecor( var1d_glm, evar2 )
            ecor_glm3 = get_ecor( var1d_glm, evar3 )
        
+           print( etbb.shape )
            var1d_tbb = etbb[:,band-7,cy,cx]
+           print( "debug ", np.max( np.abs( etbb[10,9-7,:,:] - etbb[10,13-7,:,:] ) ))
            ecor_tbb1 = get_ecor( var1d_tbb, evar1 )
            ecor_tbb2 = get_ecor( var1d_tbb, evar2 )
            ecor_tbb3 = get_ecor( var1d_tbb, evar3 )
@@ -269,7 +270,7 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
        
               ofig =  "6p_acm_var_{0:}_{1:}_{2:}_{3:}_obs_init{4:}_t{5:}_ft{6:}_x{7:}_y{8:}_zs{9:}_zt{10:}_mmem{11:}_fpacum{10:}".format( INFO["EXP"], vname1, vname2, INFO["time0"].strftime('%H%M'), \
                        str( ft_sec ).zfill(5), str( ft_sec_a ).zfill(5),  str(cx).zfill(3), str(cy).zfill(3),  str(zlev_show).zfill(2), str(zlev_tgt).zfill(2), str( mmem_ ).zfill(4), str(fp_acum).zfill(2) )
-              odir = "png/6p_acm_var_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
+              odir = "png/fig0624/6p_acm_var_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
        
            else:
               VAR_l = [ 
@@ -291,8 +292,8 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                        ]
               crs_l[5] = "XY_skip"
               fig_tit =  "Ensemble mean"
-              ofig =  "9p_emean_" + INFO["EXP"] + "_obs_t" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
-              odir = "png/9p_obs_" + INFO["EXP"] + "_em"
+              ofig =  "9p_emean_" + INFO["EXP"] + "_obs_t" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) + "_B{0:0=2}".format( band )
+              odir = "png/fig0624/9p_obs_" + INFO["EXP"] + "_em"
        
           
            ###
@@ -301,20 +302,20 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                      "GLM & {0:}".format( vname1 ), 
                      "GLM & {0:}".format( vname2 ), 
                      "GLM & {0:}".format( vname3 ), 
-                     r'IR (10.4$\mu$m) & {0:}'.format( vname1 ), 
-                     r'IR (10.4$\mu$m) & {0:}'.format( vname2 ), 
-                     r'IR (10.4$\mu$m) & {0:}'.format( vname3 ), 
+                     r'IR ({0:.1f} $\mu$m) & {1:}'.format( band2wavelength( band=band ), vname1 ), 
+                     r'IR ({0:.1f} $\mu$m) & {1:}'.format( band2wavelength( band=band ), vname2 ), 
+                     r'IR ({0:.1f} $\mu$m) & {1:}'.format( band2wavelength( band=band ), vname3 ), 
                      "", "", "", "", "", "",
                      "", "", "", "", "", "",
                    ]
            unit_l = [ 
                       '(dBZ)', 
                       '(K)', 
-                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r'min)', # GLM
+                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r' min)', # GLM
                       '(dBZ)', 
                       '(dBZ)', 
-                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r'min)',
-                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r'min)',
+                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r' min)',
+                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r' min)',
                      ]
        
 
@@ -569,7 +570,7 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                          bbox=bbox )
               
               if idx == 0:
-                 fig.text(0.95, 0.05, "t = {0:.0f} min\n(FT={1:.0f}min)".format( ft_sec/60, ft_sec_a/60.0 ),
+                 fig.text(0.95, 0.05, "t = {0:.0f} min\n(FT={1:.0f} min)".format( ft_sec/60, ft_sec_a/60.0 ),
                          fontsize=10,
                          ha='right', va='bottom',
                          )
@@ -741,6 +742,8 @@ zlev_tgts = 21
 #zlev_tgts = 14
 #zlev_tgts = 11
 
+band = 9
+
 zlev_tgts = 14
 zlev_tgte = zlev_tgts+1
 for zlev_tgt in range(zlev_tgts, zlev_tgte, 1):
@@ -749,7 +752,7 @@ for zlev_tgt in range(zlev_tgts, zlev_tgte, 1):
    for tlev in range( tmin, tmax ):
        main( INFO, tlev=tlev, vname1=vname1,
              vname2=vname2, vname3=vname3,
-             cx_l=cx_l, cy_l=cy_l, COR=COR, member=320, zlev_show=zlev_show, zlev_tgt=zlev_tgt, mmem=mmem, fp_acum=fp_acum )
+             cx_l=cx_l, cy_l=cy_l, COR=COR, member=320, zlev_show=zlev_show, zlev_tgt=zlev_tgt, mmem=mmem, fp_acum=fp_acum, band=band )
 
    if not COR:
       sys.exit()

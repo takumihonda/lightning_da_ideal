@@ -13,6 +13,8 @@ import matplotlib.patches as patches
 
 from matplotlib.colors import BoundaryNorm
 
+from tools_LT import band2wavelength
+
 quick = True
 quick = False
 
@@ -61,7 +63,8 @@ def read_vars( INFO, tlev=0, acm_fp=1 ):
 
     return( tbb, z, vr, fp, e_tot, w )
 
-def main( INFO, tlev=0, acm_fp=1 ):
+def main( INFO, tlev=0, acm_fp=1, band=13 ):
+
 
     # read variables
     tbb, z, vr, fp, e_tot, w = read_vars( INFO, tlev=tlev, acm_fp=acm_fp )
@@ -176,7 +179,7 @@ def main( INFO, tlev=0, acm_fp=1 ):
     tit_l = [ 
               "Radar",
               fp_note + "BOLT (3D flash)", 
-              r'IR (10.4$\mu$m)', 
+              r'IR ({0:.1f} $\mu$m)'.format( band2wavelength( band=band ) ), 
               fp_note + "GLM (2D flash)", 
               "",
               "",
@@ -210,7 +213,7 @@ def main( INFO, tlev=0, acm_fp=1 ):
     VAR_l = [ 
               z[zlev,:,:], 
               np.sum(fp[:,:,:], axis=0 ), # BOLT
-              tbb[13-7,:,:], 
+              tbb[band-7,:,:], 
               ndimage.convolve( np.sum( fp[:,:,:], axis=0 ), kernel, mode='reflect' ),  # GLM
               np.transpose( z[:,:,max_yx[1]] ), # radar YZ
               z[:,max_yx[0],:], # radar XZ
@@ -443,7 +446,7 @@ def main( INFO, tlev=0, acm_fp=1 ):
     fig.suptitle( "Nature run", fontsize=18 )
 
 
-    odir = "png/fig1204/4p_obs_" + INFO["EXP"]
+    odir = "png/fig0624/4p_obs_" + INFO["EXP"]
     ofig =  "4p_nature_obs_t{0:0=5}_acm_fp{1:0=2}".format( ft_sec, acm_fp )
 
     print( ofig, odir )
@@ -507,8 +510,11 @@ te = 13
 
 #ts = 6
 
+band = 9
+#band = 10
+
 acm_fp = 1
 acm_fp = 6
 
 for tlev in range( ts, te ):
-    main( INFO, tlev=tlev, acm_fp=acm_fp )
+    main( INFO, tlev=tlev, acm_fp=acm_fp, band=band )

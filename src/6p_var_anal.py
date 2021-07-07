@@ -14,7 +14,7 @@ import matplotlib.patches as patches
 from tools_LT import read_evar_only
 
 quick = True
-#quick = False
+quick = False
 
 def read_vars( INFO, tlev=0, HIM8=True ):
 
@@ -184,9 +184,9 @@ def main( INFO, EXP1="2000m_DA_0306", EXP2="2000m_DA_0306", tlev=0, typ="anal", 
     zlev_show = 14 # comment out 
 
     if typ is not "fcst":
-       info = 't={0:.0f}min\nZ={1:}km'.format( ft_sec_a/60.0, INFO["Z"][zlev_show]/1000)
+       info = 't={0:.0f} min\nZ={1:} km'.format( ft_sec_a/60.0, INFO["Z"][zlev_show]/1000)
     else:
-       info = 't={0:.0f}min (FT={1:.0f}min)\nZ={2:}km'.format( ft_sec_a/60.0, ft_sec/60.0, INFO["Z"][zlev_show]/1000)
+       info = 't={0:.0f} min (FT={1:.0f} min)\nZ={2:} km'.format( ft_sec_a/60.0, ft_sec/60.0, INFO["Z"][zlev_show]/1000)
     
     if typ is not "fcst":
        VAR_l = [ 

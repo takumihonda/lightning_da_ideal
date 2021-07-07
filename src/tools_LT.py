@@ -1330,3 +1330,14 @@ def get_dat_volume( INFO, rEXP="2000m_NODA_0306", EXP1="2000m_DA_0306", vname1="
 
     return( err_t*fac, bias_t*fac )
 
+def band2wavelength( band=13 ):
+    if band == 8:
+      return( 6.2 )
+    elif band == 9:
+      return( 6.9 )
+    elif band == 10:
+      return( 7.3 )
+    elif band == 13:
+      return( 10.4 )
+   
+

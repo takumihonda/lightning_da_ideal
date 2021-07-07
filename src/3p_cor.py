@@ -11,13 +11,13 @@ from matplotlib import gridspec
 import matplotlib.colors as mcolors
 import matplotlib.patches as patches
 
-from tools_LT import read_evar4d_nc, read_evars, get_ecor, get_eGLM
+from tools_LT import read_evar4d_nc, read_evars, get_ecor, get_eGLM, band2wavelength
 
 quick = True
 quick = False
 
 
-def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True, zlev_show=10, zlev_tgt=10, mmem=0, fp_acum=1 ):
+def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True, zlev_show=10, zlev_tgt=10, mmem=0, fp_acum=1, band=13 ):
 
 
     cx = cx_l[0]
@@ -90,7 +90,6 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
 #       cx_l = [100, 120]
 #       cy_l = [90, 100, 120]
 
-    band = 13
 
     pnum_l = [ "(a)", 
                "(b)",
@@ -285,7 +284,7 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
        
               ofig =  "3p_cor_{0:}_{1:}_obs_init{2:}_t{3:}_ft{4:}_x{5:}_y{6:}_zs{7:}_zt{8:}_mmem{9:}_fpacum{10:}".format( INFO["EXP"], vname, INFO["time0"].strftime('%H%M'), \
                        str( ft_sec ).zfill(5), str( ft_sec_a ).zfill(5),  str(cx).zfill(3), str(cy).zfill(3),  str(zlev_show).zfill(2), str(zlev_tgt).zfill(2), str( mmem_ ).zfill(4), str(fp_acum).zfill(2) )
-              odir = "png/3p_cor_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
+              odir = "png/fig0624/3p_cor_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
        
            else:
               VAR_l = [ 
@@ -328,7 +327,7 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
        
            tit_l = [ 
                      "Radar (Ref)",
-                     r'IR (10.4$\mu$m)', 
+                     r'IR ({0:.1f} $\mu$m)'.format( band2wavelength( band=band ) ), 
                      "GLM (2D flash)", 
                      "", "", "", "", "", "",
                      "", "", "", "", "", "",
@@ -336,11 +335,11 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
            unit_l = [ 
                       '(dBZ)', 
                       '(K)', 
-                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r'min)', # GLM
+                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r' min)', # GLM
                       '(dBZ)', 
                       '(dBZ)', 
-                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r'min)',
-                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r'min)',
+                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r' min)',
+                      '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r' min)',
                      ]
        
 
@@ -602,7 +601,7 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                          bbox=bbox )
               
               if idx == 0:
-                 fig.text(0.95, 0.05, "t = {0:.0f} min\n(FT={1:.0f}min)".format( ft_sec/60, ft_sec_a/60.0 ),
+                 fig.text(0.95, 0.05, "t = {0:.0f} min\n(FT={1:.0f} min)".format( ft_sec/60, ft_sec_a/60.0 ),
                          fontsize=10,
                          ha='right', va='bottom',
                          )
@@ -770,6 +769,9 @@ zlev_tgts = 21
 #zlev_tgts = 14
 #zlev_tgts = 11
 
+band = 13
+band = 9
+
 zlev_tgts = 14
 zlev_tgte = zlev_tgts+1
 for zlev_tgt in range(zlev_tgts, zlev_tgte, 1):
@@ -777,7 +779,7 @@ for zlev_tgt in range(zlev_tgts, zlev_tgte, 1):
 
    for vname in vname_l:
        for tlev in range( tmin, tmax ):
-           main( INFO, tlev=tlev, vname=vname, cx_l=cx_l, cy_l=cy_l, COR=COR, member=320, zlev_show=zlev_show, zlev_tgt=zlev_tgt, mmem=mmem, fp_acum=fp_acum )
+           main( INFO, tlev=tlev, vname=vname, cx_l=cx_l, cy_l=cy_l, COR=COR, member=320, zlev_show=zlev_show, zlev_tgt=zlev_tgt, mmem=mmem, fp_acum=fp_acum, band=band )
    
        if not COR:
           sys.exit()

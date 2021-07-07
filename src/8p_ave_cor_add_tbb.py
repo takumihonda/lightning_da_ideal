@@ -92,23 +92,26 @@ def read_ecor( INFO, stime=datetime(2001,1,1,1,0), nvar_l=["tbb"], nvar_ref="QG"
     return( ECOR, AECOR, CNT )
 
 def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_min=1, fp_acum=1, 
-               vname_l=["QG", "W", "T"], band=13, CLD=False, qhyd_min=0.001 ):
+               vname_l=["QG", "W", "T"], band_l=[13], CLD=False, qhyd_min=0.001 ):
     
     tvar_l = []
     info_l = []
     ecor_l = []
+    band_l_ = []
     for i, vname in enumerate( vname_l ):
-        ECOR, AECOR, CNT = read_ecor( INFO, stime=INFO["time0"], nvar_l=nvar_l, nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum, band=band, CLD=CLD, qhyd_min=qhyd_min )
+        ECOR, AECOR, CNT = read_ecor( INFO, stime=INFO["time0"], nvar_l=nvar_l, nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum, band=band_l[0], CLD=CLD, qhyd_min=qhyd_min )
 
-        ecor_l.append( ECOR["glm"]/ CNT["glm"])
-        info_l.append( "glm" )
-        tvar_l.append( vname )
-
-    for i, vname in enumerate( vname_l ):
-        ECOR, AECOR, CNT = read_ecor( INFO, stime=INFO["time0"], nvar_l=nvar_l, nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum, band=band, CLD=CLD, qhyd_min=qhyd_min )
         ecor_l.append( ECOR["tbb"]/ CNT["tbb"])
         info_l.append( "tbb" )
         tvar_l.append( vname )
+        band_l_.append( band_l[0] )
+
+    for i, vname in enumerate( vname_l ):
+        ECOR, AECOR, CNT = read_ecor( INFO, stime=INFO["time0"], nvar_l=nvar_l, nvar_ref=vname, tlev=tlev, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum, band=band_l[1], CLD=CLD, qhyd_min=qhyd_min )
+        ecor_l.append( ECOR["tbb"]/ CNT["tbb"])
+        info_l.append( "tbb" )
+        tvar_l.append( vname )
+        band_l_.append( band_l[1] )
     print( info_l )
 
         #ecor_l.append( AECOR[nvar]/ CNT[nvar])
@@ -150,7 +153,7 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
 
     gs = gridspec.GridSpec( 3, 7, 
                             height_ratios=( dv, dv2, dv ), 
-                            width_ratios=( dh, dh2, dh, dh2, dh, dh2, dh ) )
+                            width_ratios=( dh, dh2, dh, dh2, dh, dh2, dh, ) )
     axs = [ 
              plt.subplot(gs[0, 0]), 
              plt.subplot(gs[0, 2]), 
@@ -172,7 +175,7 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
     ax7 = axs[6]
     ax8 = axs[7]
 
-    ax_l = [ ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8 ]
+    ax_l = [ ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ]
 
     fig.subplots_adjust(left=0.05, bottom=0.08, right=0.92, top=0.95,
                         wspace=0.0, hspace=0.0)
@@ -180,7 +183,7 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
 #    fig, (( ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = plt.subplots( 2, 4, figsize=( 10, 6))
 ##                        wspace=0.3, hspace=0.4)
  
-    pnum_l = [ "(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)", "(h)" ]
+    pnum_l = [ "(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)", "(h)", "(i)", "(j)" ]
 #    ax_l = [ ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8 ]
     bbox = { 'facecolor':'w', 'alpha':0.95, 'pad':1.5, 'edgecolor':'w' }
 
@@ -229,7 +232,7 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
         if info_l[n] == "esfc":
            var3d_ = "Surface Ez"
         elif info_l[n] == "tbb":
-           var3d_ = r'IR ({0:.1f} $\mu$m)'.format( band2wavelength(band=band) )
+           var3d_ = r'IR ({0:.1f} $\mu$m)'.format( band2wavelength(band=band_l_[n]) )
         else:
            var3d_ = str.upper( info_l[n] )
         ax.text( 0.5, 0.95, '{:1} & {:2}'.format( var3d_, tvar_l[n] ),
@@ -254,7 +257,7 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
        tit = r'Averaged ensemble-based correlations (where column maximum q$_h$ > {0:.1f} g kg$^{{-1}}$)'.format( qhyd_min*1.e3 )
     fig.suptitle( tit, fontsize=12 )
 
-    odir = "pdf/fig20210624/8p_ave_cor_" + INFO["EXP"]
+    odir = "png/fig20210624/8p_ave_cor_" + INFO["EXP"]
     odir = "pdf/fig20210624/"
 
     if CLD:
@@ -263,7 +266,7 @@ def plot_ecor( INFO, nvar_l=[],tlev=0, vname="QG", member=80, zlev_tgt=10, mem_m
        cld_ = ""
  
 
-    ofig = '8p_{0:}_{1:}_z{2:0=2}_{3:}_lm{4:0=3}_ac{5:0=2}_B{6:0=2}{7:}.pdf'.format( info_l[n], vname, zlev_tgt_, INFO["EXP"], mem_min, fp_acum, band, cld_ )
+    ofig = '8p_{0:}_{1:}_z{2:0=2}_{3:}_lm{4:0=3}_ac{5:0=2}_B{6:0=2}{7:}_add_tbb.pdf'.format( info_l[n], vname, zlev_tgt_, INFO["EXP"], mem_min, fp_acum, band, cld_ )
 
     print( ofig, odir )
  
@@ -377,12 +380,15 @@ nvar_l = ["tbb", "glm", "esfc"]
 #nvar_l = ["vr", "glm", "z"]
 
 nvar_l = ["glm", "tbb", ]
+nvar_l = ["tbb", "tbb", ]
 
 vname_l=["QHYD", "W", "QV", "T"]
 #vname_l=["QHYD", "QS", "QV", "T"]
 
+vname_l=["QHYD", "W", "QV", "T",]
+
 band = 13
-band = 9
+band_l = [ 8, 10 ]
 #band = 8
 
 CLD = True
@@ -392,5 +398,5 @@ qhyd_min = 0.001
 
 for tlev in range( tmin, tmax ):
     plot_ecor( INFO, nvar_l=nvar_l, tlev=tlev, vname=vname, member=320, zlev_tgt=zlev_tgt, mem_min=mem_min, fp_acum=fp_acum, 
-       vname_l=vname_l, band=band, CLD=CLD, qhyd_min=qhyd_min )
+       vname_l=vname_l, band_l=band_l, CLD=CLD, qhyd_min=qhyd_min )
 

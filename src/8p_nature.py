@@ -181,7 +181,7 @@ def main( INFO, tlev=0, acm_fp=1 ):
               "Radar",
               #fp_note + "BOLT (3D flash)", 
               fp_note + "3D flash", 
-              r'IR (10.4$\mu$m)', 
+              r'IR (10.4 $\mu$m)', 
 #              "Surface Ez", 
               fp_note + "GLM (2D flash)", 
               "",
@@ -200,14 +200,14 @@ def main( INFO, tlev=0, acm_fp=1 ):
 
     unit_l = [ 
                '(dBZ)', 
-               '(flash/' + str( int( INFO["DT"]*acm_fp/60.0 ) ) + r'min)',
+               '(flash/' + str( int( INFO["DT"]*acm_fp/60.0 ) ) + r' min)',
                '(K)', 
 #               '(kV/m)', # E
-               '(flash/' + str( int( INFO["DT"]*acm_fp/60.0 ) ) + r'min)', # GLM
+               '(flash/' + str( int( INFO["DT"]*acm_fp/60.0 ) ) + r' min)', # GLM
                '(dBZ)', 
                '(dBZ)', 
-               '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r'min)',
-               '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r'min)',
+               '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r' min)',
+               '(flash/' + str( int( INFO["DT"]/60.0 ) ) + r' min)',
               ]
 
     res = np.unravel_index( np.argmax(w[:,:,:]), w[:,:,:].shape )
