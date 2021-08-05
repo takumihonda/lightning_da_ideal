@@ -14,7 +14,7 @@ import matplotlib.patches as patches
 from tools_LT import read_evar4d_nc, read_evars, get_ecor, get_eGLM, band2wavelength
 
 quick = True
-#quick = False
+quick = False
 
 
 def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True, zlev_show=10, zlev_tgt=10, mmem=0, fp_acum=1, 
@@ -269,8 +269,9 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
               fig_tit =  "Ensemble-based correlations" 
        
               ofig =  "6p_acm_var_{0:}_{1:}_{2:}_{3:}_obs_init{4:}_t{5:}_ft{6:}_x{7:}_y{8:}_zs{9:}_zt{10:}_mmem{11:}_fpacum{10:}".format( INFO["EXP"], vname1, vname2, INFO["time0"].strftime('%H%M'), \
-                       str( ft_sec ).zfill(5), str( ft_sec_a ).zfill(5),  str(cx).zfill(3), str(cy).zfill(3),  str(zlev_show).zfill(2), str(zlev_tgt).zfill(2), str( mmem_ ).zfill(4), str(fp_acum).zfill(2) )
-              odir = "png/fig0624/6p_acm_var_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
+                       str( ft_sec ).zfill(5), str( ft_sec_a ).zfill(5),  str(cx).zfill(3), str(cy).zfill(3),  str(zlev_show).zfill(2), str(zlev_tgt).zfill(2), str( mmem_ ).zfill(4), str(fp_acum).zfill(2) ) + '.pdf'
+              #odir = "png/fig0624/6p_acm_var_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
+              odir = "pdf/fig20210624/6p_acm_var_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
        
            else:
               VAR_l = [ 
@@ -292,8 +293,9 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                        ]
               crs_l[5] = "XY_skip"
               fig_tit =  "Ensemble mean"
-              ofig =  "9p_emean_" + INFO["EXP"] + "_obs_t" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) + "_B{0:0=2}".format( band )
-              odir = "png/fig0624/9p_obs_" + INFO["EXP"] + "_em"
+              ofig =  "9p_emean_" + INFO["EXP"] + "_obs_t" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) + "_B{0:0=2}".format( band ) + '.pdf'
+              #odir = "png/fig0624/9p_obs_" + INFO["EXP"] + "_em"
+              odir = "pdf/fig20210624/9p_obs_" + INFO["EXP"] + "_em"
        
           
            ###

@@ -290,9 +290,11 @@ def main( INFO, EXP1="2000m_DA_0306", EXP2="2000m_DA_0306", tlev=0, typ="anal", 
 #    fig.suptitle( fig_tit, fontsize=16 )
 
 
-    odir = "png/6p_DA_var" 
+    #odir = "png/6p_DA_var" 
+    odir = "pdf/fig20210624" 
 
-    ofig = '6p_{:1}_{:2}_{:3}_fta{:05}_ft{:05}_z{:0=2}_{:}.png'.format(typ, EXP1, EXP2, ft_sec_a, ft_sec, zlev_show, vname)
+    #ofig = '6p_{:1}_{:2}_{:3}_fta{:05}_ft{:05}_z{:0=2}_{:}.png'.format(typ, EXP1, EXP2, ft_sec_a, ft_sec, zlev_show, vname)
+    ofig = '6p_{:1}_{:2}_{:3}_fta{:05}_ft{:05}_z{:0=2}_{:}.pdf'.format(typ, EXP1, EXP2, ft_sec_a, ft_sec, zlev_show, vname)
 
 
     print( ofig, odir )

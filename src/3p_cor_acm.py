@@ -14,7 +14,7 @@ import matplotlib.patches as patches
 from tools_LT import read_evar4d_nc, read_evars, get_ecor, get_eGLM
 
 quick = True
-#quick = False
+quick = False
 
 
 def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True, zlev_show=10, zlev_tgt=10, mmem=0, fp_acum=1 ):
@@ -246,8 +246,8 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
               fig_tit =  "Ensemble-based correlations with " + vname 
        
               ofig =  "3p_acm_cor_{0:}_{1:}_obs_init{2:}_t{3:}_ft{4:}_x{5:}_y{6:}_zs{7:}_zt{8:}_mmem{9:}_fpacum{10:}".format( INFO["EXP"], vname, INFO["time0"].strftime('%H%M'), \
-                       str( ft_sec ).zfill(5), str( ft_sec_a ).zfill(5),  str(cx).zfill(3), str(cy).zfill(3),  str(zlev_show).zfill(2), str(zlev_tgt).zfill(2), str( mmem_ ).zfill(4), str(fp_acum).zfill(2) )
-              odir = "png/3p_acm_cor_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
+                       str( ft_sec ).zfill(5), str( ft_sec_a ).zfill(5),  str(cx).zfill(3), str(cy).zfill(3),  str(zlev_show).zfill(2), str(zlev_tgt).zfill(2), str( mmem_ ).zfill(4), str(fp_acum).zfill(2) ) + '.pdf'
+              odir = "pdf/fig20210624/3p_acm_cor_" + INFO["EXP"] + "/" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
        
            else:
               VAR_l = [ 
@@ -276,8 +276,9 @@ def main( INFO, tlev=0, vname="QG", cx_l=[100], cy_l=[100], member=80, COR=True,
                        ]
               crs_l[5] = "XY_skip"
               fig_tit =  "Ensemble mean"
-              ofig =  "9p_emean_" + INFO["EXP"] + "_obs_t" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
-              odir = "png/9p_obs_" + INFO["EXP"] + "_em"
+              ofig =  "9p_emean_" + INFO["EXP"] + "_obs_t" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) + '.pdf'
+              #odir = "png/9p_obs_" + INFO["EXP"] + "_em"
+              odir = "pdf/fig20210624/9p_obs_" + INFO["EXP"] + "_em"
        
           
            ###

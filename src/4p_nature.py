@@ -16,7 +16,7 @@ from matplotlib.colors import BoundaryNorm
 from tools_LT import band2wavelength
 
 quick = True
-quick = False
+#quick = False
 
 def read_vars( INFO, tlev=0, acm_fp=1 ):
 
@@ -446,8 +446,9 @@ def main( INFO, tlev=0, acm_fp=1, band=13 ):
     fig.suptitle( "Nature run", fontsize=18 )
 
 
-    odir = "png/fig0624/4p_obs_" + INFO["EXP"]
-    ofig =  "4p_nature_obs_t{0:0=5}_acm_fp{1:0=2}".format( ft_sec, acm_fp )
+    #odir = "png/fig0624/4p_obs_" + INFO["EXP"]
+    odir = "pdf/fig20210624/4p_obs_" + INFO["EXP"]
+    ofig =  "4p_nature_obs_t{0:0=5}_acm_fp{1:0=2}.pdf".format( ft_sec, acm_fp )
 
     print( ofig, odir )
  

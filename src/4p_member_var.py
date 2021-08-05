@@ -225,8 +225,9 @@ def main( INFO, tlev=0, vname="QG", member=80, zlev_show=10, zlev_tgt=10, mem=0,
            if ftit is not None:
               fig_tit = ftit
 
-           ofig =  "4p_" + tmem + "_" + INFO["EXP"] + "_t" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) 
-           odir = "png/4p_var_" + INFO["EXP"] + "_em"
+           ofig =  "4p_" + tmem + "_" + INFO["EXP"] + "_t" + str( ft_sec ).zfill(5) + "_ft" + str( ft_sec_a ).zfill(5) + '.pdf'
+           #odir = "png/4p_var_" + INFO["EXP"] + "_em"
+           odir = "pdf/fig20210624/4p_var_" + INFO["EXP"] + "_em"
           
            ###
        

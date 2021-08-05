@@ -14,7 +14,7 @@ import matplotlib.patches as patches
 from matplotlib.colors import BoundaryNorm
 
 quick = True
-quick = False
+#quick = False
 
 def read_vars( INFO, tlev=0, acm_fp=1 ):
 

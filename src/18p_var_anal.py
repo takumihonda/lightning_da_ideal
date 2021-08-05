@@ -485,9 +485,10 @@ def main( INFO, EXP1="2000m_DA_0306", EXP2="2000m_DA_0306", NEXP="2000m_NODA_030
 #    fig.suptitle( fig_tit, fontsize=16 )
 
 
-    odir = 'png/18p_DA_var/{0:}/i{1:03}_j{2:03}'.format( EXP2, cx, cy )
+    #odir = 'png/18p_DA_var/{0:}/i{1:03}_j{2:03}'.format( EXP2, cx, cy )
+    odir = 'pdf/fig20210624/18p_DA_var/{0:}/i{1:03}_j{2:03}'.format( EXP2, cx, cy )
 
-    ofig = '18p_{0:}_{1:}_{2:}_fta{3:05}_ft{4:05}_z{5:0=2}_{6:}_{7:}.png'.format(typ, EXP1, EXP2, ft_sec_a, ft_sec, zlev_show, vname1, vname2)
+    ofig = '18p_{0:}_{1:}_{2:}_fta{3:05}_ft{4:05}_z{5:0=2}_{6:}_{7:}.pdf'.format(typ, EXP1, EXP2, ft_sec_a, ft_sec, zlev_show, vname1, vname2)
 
 
     print( ofig, odir )
