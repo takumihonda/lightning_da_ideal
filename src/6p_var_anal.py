@@ -86,7 +86,7 @@ def main( INFO, EXP1="2000m_DA_0306", EXP2="2000m_DA_0306", tlev=0, typ="anal", 
 
 
     tit_l = [ "NODA (analysis)", 
-              "DA (analysis)", 
+              "RDA (analysis)", 
               "Nature run" ]
     if typ is "fcst":
        foot = "\n(fcst from mean)"
@@ -94,10 +94,10 @@ def main( INFO, EXP1="2000m_DA_0306", EXP2="2000m_DA_0306", tlev=0, typ="anal", 
           foot = "\n(analysis)"
        tit_l = [
                  "NODA" + foot, 
-                 "DA" + foot, 
+                 "RDA" + foot, 
                  "Nature run",
                  "NODA" + foot, 
-                 "DA" + foot, 
+                 "RDA" + foot, 
                  "Nature run",
                  ]
 
